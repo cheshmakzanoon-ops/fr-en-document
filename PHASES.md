@@ -11,8 +11,8 @@
 |-------|-------|--------|
 | 1 | Foundation audit & dev environment | **complete** |
 | 2 | Rebranding (name, logo, colors, app copy) | **complete** |
-| 3 | Bilingual i18n (EN/FR) with Lingui | pending |
-| 4 | Canadian hosting & data residency | pending |
+| 3 | Canadian hosting & data residency (AWS ca-central-1) | pending operator provisioning |
+| 4 | Bilingual i18n (EN/FR) with Lingui | pending |
 | 5 | PIPEDA / Law 25 compliance workstream | pending |
 | 6 | Billing & plans (SMB pricing tiers) | pending |
 | 7 | Admin, audit trail & reporting | pending |
@@ -114,5 +114,73 @@ check still pending before any public launch (see `BRANDING.md`).
    the handoff for the operator's machine (sandbox has no docker/Postgres).
 8. **Deferred to later phases** — PNG/ICO/OG raster regeneration from the
    SVGs (pre-launch), `packages/ee` white-label/branding decisions (Phase 6),
-   `NEXT_PUBLIC_*` env defaults for the production domain (Phase 3),
+   `NEXT_PUBLIC_*` env defaults for the production domain (delivered in
+   Phase 3, see below),
    signature-disclosure legal text finalization (Phase 5).
+
+> **Phase renumber note:** Phase 3 was reordered during Phase 3 work —
+> Canadian hosting & data residency now precedes bilingual i18n (the user's
+> working plan: "Phase 3 = Canadian hosting & production infrastructure").
+> DECISIONS.md entries D-015 and earlier predate this reorder; the new
+> Phase 3 is documented below.
+
+## Phase 3 — Canadian hosting & data residency (pending operator provisioning)
+
+The repo-side Phase 3 deliverable set is **complete** (this section + the
+runbooks); the phase only advances to **complete** once the operator has
+provisioned AWS/DNS and passed the first-deploy smoke test.
+
+1. **Deployment architecture + residency claim** — `DEPLOYMENT.md`:
+   component diagram (VM, Postgres 16, S3, SES, Caddy, DNS), every
+   component labeled ca-central-1 (Montreal), the exact claim wording
+   ("data at rest and document processing occur in AWS ca-central-1,
+   Montreal"), and what is NOT in Canada and why (commit `ae07e04`).
+2. **Production deploy artifacts** — `docker/production/Dockerfile`
+   (multi-stage, non-root, healthcheck), `docker-compose.prod.yml`
+   (app + postgres:16 + Caddy auto-TLS, Coolify-compatible),
+   `.env.production.example` with every variable documented (commit
+   `c2eaae2`).
+3. **Storage (S3)** — `docs/runbooks/01-storage-s3.md` + IAM policies in
+   `docs/runbooks/policies/`: buckets in ca-central-1, public access
+   blocked, versioning on documents, AppUser/BackupUser least-privilege.
+   Upload transport is env-config-only; no code change (commit `cade38a`).
+4. **Email (SES)** — `docs/runbooks/02-email-ses.md`: verify northsign.ca,
+   DKIM/SPF/DMARC, SMTP credentials, sandbox exit, exact env values,
+   sender no-reply@mail.northsign.ca. Nodemailer needs no code change
+   (commit `2843ca1`).
+5. **DNS** — `docs/runbooks/03-dns.md`: records table for northsign.ca,
+   Cloudflare + registrar instructions, no MX (commit `592ab6b`).
+6. **Backups & restore** — `scripts/backup.sh` (nightly pg_dump → S3,
+   14 daily + 4 weekly retention) + `RESTORE.md` (fresh-VM restore drill,
+   document versioning recovery) (commit `907f8f7`).
+7. **VM hardening** — `docs/runbooks/04-vm-hardening.md`: Ubuntu 24.04,
+   SSH key-only, ufw 22/80/443, unattended-upgrades, non-root deploy user
+   in docker group, chmod-600 secrets, 2 GB swap, America/Toronto
+   (commit `6d26b11`).
+8. **First deploy + health** — unauthenticated `GET /api/health` added to
+   the Hono router (Docker HEALTHCHECK / Caddy / UptimeRobot target) +
+   `DEPLOY.md` first-deploy sequence, production seed guard, smoke-test
+   checklist (commit `51113eb`).
+9. **Monitoring (minimal)** — `docs/runbooks/05-monitoring.md`:
+   UptimeRobot on /api/health, container log locations, weekly disk check.
+   Full observability deferred to Phase 9 (commit `fb961df`).
+
+### Status detail
+
+- [x] DEPLOYMENT.md (architecture + residency claim + cost table)
+- [x] Production Dockerfile, compose stack, Caddyfile, env template
+- [x] S3 runbook + IAM policies
+- [x] SES runbook
+- [x] DNS runbook
+- [x] backup.sh + RESTORE.md
+- [x] VM hardening runbook
+- [x] /api/health endpoint + DEPLOY.md (first deploy + smoke tests)
+- [x] Monitoring runbook
+- [x] DECISIONS.md D-017..D-021 (decisions below)
+- [ ] **Operator provisioning (blocks the rest of the phase):** AWS
+      account + ca-central-1 region, domain purchase/transfer for
+      northsign.ca, VM instance, SES/DNS/S3 setup per runbooks 01–03,
+      first deploy per DEPLOY.md, smoke test passed, quarterly restore
+      drill scheduled
+- [ ] Phase 3 exit criteria: smoke-test checklist fully green and the
+      residency claim verifiable from the running stack (see handoff)

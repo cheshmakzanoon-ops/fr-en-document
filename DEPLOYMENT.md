@@ -199,3 +199,26 @@ Key production values:
 
 Execution order for the operator is in the Phase 3 handoff report
 (`PHASES.md` → Phase 3 section and the session handoff).
+
+---
+
+## 8. Monthly cost (estimates — Phase 3, Step 10)
+
+> **All figures are estimates for planning**, current as of Phase 3, at
+> MVP scale (single VM, <10 GB documents, <10k emails/month). AWS pricing
+> changes; re-verify before committing.
+
+| Line item | Detail | Est. monthly | Notes |
+|---|---|---|---|
+| VM (EC2) | `t3.medium` (2 vCPU / 4 GB), on-demand, ca-central-1 | ~$30 | ~$0.0416/hr; 1-yr reserved cuts this to ~$20; includes 2 GB swap headroom (runbook 04) |
+| VM disk (EBS) | 30 GB gp3 root volume | ~$3 | backups go to S3, not disk |
+| S3 storage | `northsign-documents` + `northsign-backups`, ~10 GB with versions | ~$0.25 | ~$0.023/GB in ca-central-1; versioning adds copies — still sub-$1 at MVP scale |
+| S3 requests | presigned uploads/downloads at MVP volume | ~$0.10 | negligible until traffic grows |
+| SES | 10k transactional emails | ~$1 | $0.10 per 1k; sandbox exit required (runbook 02) |
+| Domain | northsign.ca registration/renewal | ~$1.50 | ~$15–20/yr at typical registrars |
+| Monitoring | UptimeRobot free plan | $0 | 5-min checks, email alerts |
+| **Total estimate** | | **~$35–40** | excl. tax; AWS support plans, Coolify, etc. not included |
+
+Cost levers later: reserve the VM (Phase 9), move to Graviton (`c7g.*`,
+cheaper in ca-central-1), and revisit RDS only if managed ops beat the
+on-VM cost (D-018).

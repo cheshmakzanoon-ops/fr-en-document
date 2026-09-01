@@ -192,4 +192,83 @@
   Inbucket keeps catching mail in dev.
 - **Why:** dev mail must keep working without a real domain; the branding
   module default is the single place the sender identity is defined today.
-- **Consequence:** Phase 3 change is env config + DNS, not code.
+- **Consequence:** Phase 3 change is env config + DNS, not code. Delivered
+  in Phase 3 (see D-019, D-020).
+
+---
+
+## 2026-09-01 — Phase 3: Canadian hosting & production infrastructure
+
+> Phase numbering reorder: Canadian hosting is now Phase 3 (before
+> bilingual i18n, which moves to Phase 4). Entries D-015 and earlier predate
+> the reorder.
+
+### D-017: Region pinning is an architecture rule, not a preference
+- **Decision:** every runtime component must be hostable in AWS
+  ca-central-1 (Montreal). Any dependency without a Canadian region is
+  flagged and swapped before it enters production. Documented in
+  `DEPLOYMENT.md` ("the architecture rule").
+- **Why:** the data-residency claim is the product's core differentiator
+  and the marketing/legal language depends on it ("data at rest and
+  document processing occur in AWS ca-central-1, Montreal"). PIPEDA and
+  Law 25 buyers explicitly shop this property; a single non-Canadian
+  runtime dependency (e.g. a US-only analytics SDK or queue) would make
+  the claim false.
+- **Consequence:** every Phase 3 choice below was screened against this
+  rule (S3, SES, Postgres, Caddy, monitoring). Future phases must do the
+  same; the rule is stated verbatim in DEPLOYMENT.md.
+
+### D-018: PostgreSQL on the VM, not RDS (for now)
+- **Decision:** Postgres 16 runs as a container on the same VM as the app
+  (`docker-compose.prod.yml`), with nightly `pg_dump` custom-format
+  backups to S3. No RDS.
+- **Why:** the MVP is a single small workload on one VM; an on-VM Postgres
+  is region-pinned to ca-central-1 by construction (the EBS volume is
+  there), costs nothing extra, and `pg_dump`/`pg_restore` backup and
+  restore are simple and already drilled (RESTORE.md). RDS in ca-central-1
+  would add managed failover/PITR but also minimum-instance cost and
+  another moving part — no residency advantage (both are ca-central-1).
+- **Consequence:** revisit RDS (or a managed Postgres) in Phase 9 when
+  availability/point-in-time-recovery requirements are concrete; the
+  backup/restore contract (custom-format dumps in S3) carries over either
+  way.
+
+### D-019: SES over Postmark (region rule decides it)
+- **Decision:** transactional email uses AWS SES in ca-central-1 via the
+  SMTP interface (host `email-smtp.ca-central-1.amazonaws.com:587`,
+  STARTTLS), sender `no-reply@mail.northsign.ca`. No third-party email
+  API.
+- **Why:** Postmark (the main alternative) has no Canadian region — its
+  sending infrastructure is US/EU, which would break the residency rule
+  for the email path. SES in ca-central-1 keeps the whole sending stack in
+  Montreal, is pay-per-message (cheap at MVP volume), and needs zero code
+  (nodemailer `smtp-auth` transport already exists).
+- **Consequence:** deliverability hardening (IP warm-up, dedicated IP,
+  reputation management) is a Phase 9/10 concern; if it ever becomes a
+  problem, the swap surface is small (SMTP env values + DNS), but the
+  replacement must satisfy D-017.
+
+### D-020: Seed never runs in production
+- **Decision:** the seed script (`packages/prisma/seed-database.ts`) runs
+  only when explicitly invoked (`npm run prisma:seed` / `prisma db seed`).
+  The production path (`docker/start.sh` → `prisma migrate deploy`) never
+  seeds; DEPLOY.md documents the guard. No code change was required.
+- **Why:** seeding demo users/documents into a production database would
+  be a data-integrity incident; upstream never wired seed into `migrate
+  deploy`, and our image runs only `migrate deploy`.
+- **Consequence:** the guard is documented (DEPLOY.md Sec. 4) and remains
+  in force for every future deploy path (Coolify, CI, etc.).
+
+### D-021: Trivial /api/health added; full observability deferred to Phase 9
+- **Decision:** added an unauthenticated `GET /api/health` returning
+  `{"status":"ok"}` in `apps/remix/server/router.ts` (small, justified
+  code addition). It is side-effect free (no DB call) so uptime checks
+  measure process liveness, not app depth. Monitoring for this phase is
+  one UptimeRobot monitor + container logs + a weekly disk check
+  (`docs/runbooks/05-monitoring.md`).
+- **Why:** the Docker HEALTHCHECK, Caddy and UptimeRobot all need a stable
+  liveness URL; upstream referenced /api/health in its start script but
+  never implemented it. Metrics/tracing/log shipping are a Phase 9
+  decision (hardening) — and when they land, they must satisfy D-017.
+- **Consequence:** one new route in the Hono router; nothing else changed
+  in the app. No new dependencies.
