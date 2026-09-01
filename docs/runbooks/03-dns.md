@@ -2,7 +2,7 @@
 
 > Phase 3, Step 5. Complete records table for `northsign.ca`. Written for
 > **either Cloudflare or plain registrar DNS** — the record set is
-> identical; only the proxy setting and the www handling differ (see §3).
+> identical; only the proxy setting and the www handling differ (see Sec. 3).
 >
 > **No MX records.** NorthSign sends email only (SES outbound). Nothing
 > receives mail on this domain, so no MX and no A/AAAA for an inbound mail
@@ -99,4 +99,4 @@ dig @8.8.8.8 +short A app.northsign.ca
 
 DNS records should be published **before** the first deploy (DEPLOY.md
 step 1) so that Caddy can issue certificates on first start. DKIM/SPF/DMARC
-must be live before the SES identity shows Verified (runbook 02 §5).
+must be live before the SES identity shows Verified (runbook 02 Sec. 5).

@@ -94,6 +94,15 @@ app.use(async (c, next) => {
   await next();
 });
 
+/**
+ * Liveness probe for the container HEALTHCHECK, Caddy, and uptime monitors
+ * (UptimeRobot). Deliberately unauthenticated and side-effect free: it must
+ * answer even while the database is briefly unavailable, so operators can
+ * distinguish "the process is up" from "the app is fully functional".
+ * Added in Phase 3 Step 8 (production infrastructure) — DEPLOYMENT.md §2.
+ */
+app.get('/api/health', (c) => c.json({ status: 'ok' }));
+
 // Apply cors and rate limits to API routes.
 app.use(`/api/v1/*`, cors());
 app.use('/api/v1/*', apiV1RateLimitMiddleware);

@@ -31,7 +31,7 @@ That sentence is the product claim. Scope of the claim (what it covers):
 The claim covers **data at rest** (database, document objects, backups) and
 **document processing** (everything that runs in the app container: signing,
 certificate rendering, audit logs, conversion). It does not cover transit —
-see §4 for the precise exclusions.
+see Sec. 4 for the precise exclusions.
 
 ---
 

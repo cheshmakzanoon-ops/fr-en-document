@@ -20,7 +20,7 @@
 Bucket names must be globally unique across all AWS accounts. If
 `northsign-documents` / `northsign-backups` are taken, use a suffixed name
 (e.g. `northsign-prod-documents`) and update the app configuration in
-§4 accordingly.
+Sec. 4 accordingly.
 
 ```bash
 export AWS_REGION=ca-central-1
@@ -60,7 +60,7 @@ anonymous access, and no CloudFront at MVP. All reads/writes go through
 
 ```bash
 # Documents: versioning ON — this is the primary document-recovery mechanism
-# (see RESTORE.md §3). Every overwrite/delete becomes a recoverable version.
+# (see RESTORE.md Sec. 3). Every overwrite/delete becomes a recoverable version.
 aws s3api put-bucket-versioning \
   --bucket northsign-documents \
   --versioning-configuration Status=Enabled

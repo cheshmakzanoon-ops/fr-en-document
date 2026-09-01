@@ -13,8 +13,8 @@
 
 | Data | Mechanism | Recovery |
 |---|---|---|
-| PostgreSQL (users, docs metadata, envelopes, audit logs) | `scripts/backup.sh` — nightly `pg_dump` (custom) → `s3://northsign-backups/northsign-postgres/YYYY-MM-DD.dump`; retention 14 daily + 4 weekly | This document, §2 |
-| Document PDFs (S3) | **Versioning enabled** on `northsign-documents`; the app only overwrites/deletes via versioned writes | This document, §3 |
+| PostgreSQL (users, docs metadata, envelopes, audit logs) | `scripts/backup.sh` — nightly `pg_dump` (custom) → `s3://northsign-backups/northsign-postgres/YYYY-MM-DD.dump`; retention 14 daily + 4 weekly | This document, Sec. 2 |
+| Document PDFs (S3) | **Versioning enabled** on `northsign-documents`; the app only overwrites/deletes via versioned writes | This document, Sec. 3 |
 | Signing certificate `.p12` + passphrase | File on the VM + passphrase in `.env` | Copy both off-VM at provisioning time (scp) |
 | Encryption keys (`NEXT_PRIVATE_ENCRYPTION_KEY*`, `NEXTAUTH_SECRET`) | In the VM's `.env` | Keep an encrypted off-VM copy — **lost keys = unreadable data** |
 
@@ -170,7 +170,7 @@ Notes:
 
 - Deleting the **delete marker** is the cleanest way to undo a delete:
   `aws s3api delete-object --bucket northsign-documents --key "<key>" --version-id "<delete-marker-version-id>"`.
-- If the database itself was lost, restore §2 first, then use §3 to
+- If the database itself was lost, restore Sec. 2 first, then use Sec. 3 to
   re-upload any objects that were lost between the last dump and the
   incident (the DB holds the keys; S3 holds the bytes — together they are
   the full document store).
@@ -179,7 +179,7 @@ Notes:
 
 ## 4. Restore-drill checklist (quarterly)
 
-- [ ] Timed run of §2 on a throwaway VM — record start/end time.
+- [ ] Timed run of Sec. 2 on a throwaway VM — record start/end time.
 - [ ] Row counts in step 7 match the source.
 - [ ] Signed-PDF download + fresh upload work.
 - [ ] `.env` and `cert.p12` copies are retrievable from wherever they are
