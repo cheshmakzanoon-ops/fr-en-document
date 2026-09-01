@@ -93,7 +93,7 @@ export const EmailDomainsUpsell = () => {
                 )}
 
                 <span className="truncate">
-                  {isBranded ? <Trans>Sending from your domain</Trans> : <Trans>Sending from app.documenso.com</Trans>}
+                  {isBranded ? <Trans>Sending from your domain</Trans> : <Trans>Sending from app.northsign.ca</Trans>}
                 </span>
               </motion.div>
             </AnimatePresence>
@@ -175,7 +175,7 @@ export const EmailDomainsUpsell = () => {
                       transition={{ duration: 0.28, ease: EASE }}
                       className="truncate"
                     >
-                      {isBranded ? brandedSender.email : 'noreply@app.documenso.com'}
+                      {isBranded ? brandedSender.email : 'noreply@app.northsign.ca'}
                     </motion.p>
                   </AnimatePresence>
                 </div>
