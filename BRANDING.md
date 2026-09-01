@@ -11,20 +11,25 @@
 
 ## Colors
 
+> The draft palette (maple red `#C8102E` / slate / amber) was refined during
+> implementation to a northern-lights teal for the primary — see D-012. The
+> table below is the shipped palette.
+
 | Role | Hex | Notes |
 |------|-----|-------|
-| Primary | `#C8102E` | Maple red; approx `hsl(350, 85%, 42%)`. ≥4.5:1 on white. |
+| Primary | `#0E7C66` | Northern-lights teal; `hsl(168, 80%, 27%)`. ≥4.5:1 luminance contrast on white, 3:1+ for large UI. |
 | Secondary | `#212B36` | Dark slate for text/surfaces. |
-| Accent | `#F2A900` | Amber for highlights/badges; decorative only (low contrast on white). |
+| Accent | `#D96C2C` | Northern amber for highlights/badges; decorative only (low contrast on white). |
 
 Primary-foreground (text on primary buttons): `#FFFFFF`.
-Dark-mode primary: `#E4405C` (lightened for contrast on dark surfaces).
+Dark-mode primary: `#7DC3B1` (lightened teal `documenso-300` for contrast on
+surfaces).
 
 ## Logo variants
 
-- `logo.svg` — horizontal wordmark + maple-leaf mark (light backgrounds).
-- `logo-dark.svg` — same mark, light text (dark backgrounds).
-- `favicon.svg` — maple-leaf mark only.
+- `packages/assets/logo.svg` — horizontal wordmark + north-star mark (dark ink).
+- `packages/assets/logo-dark.svg` — same mark, light ink (dark backgrounds).
+- `packages/assets/favicon.svg` — north-star mark on the teal brand tile.
 - PNG/ICO rasters (favicon.ico, apple-touch-icon, android-chrome, opengraph
   JPG) must be regenerated from the SVGs before launch — see deferred list.
 

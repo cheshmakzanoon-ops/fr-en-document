@@ -3,6 +3,7 @@ import {
   NEXT_PUBLIC_SIGNING_CONTACT_INFO,
   NEXT_PUBLIC_WEBAPP_URL,
 } from '@documenso/lib/constants/app';
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { env } from '@documenso/lib/utils/env';
 import type { PDF, Signer } from '@libpdf/core';
 import { match } from 'ts-pattern';
@@ -42,7 +43,7 @@ export const signPdf = async ({ pdf }: SignOptions) => {
 
   const { bytes } = await pdf.sign({
     signer,
-    reason: 'Signed by Documenso',
+    reason: `Signed by ${APP_NAME}`,
     location: NEXT_PUBLIC_WEBAPP_URL(),
     contactInfo: NEXT_PUBLIC_SIGNING_CONTACT_INFO(),
     subFilter: NEXT_PRIVATE_USE_LEGACY_SIGNING_SUBFILTER() ? 'adbe.pkcs7.detached' : 'ETSI.CAdES.detached',

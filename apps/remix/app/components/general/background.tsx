@@ -26,8 +26,8 @@ export const Background = ({ ...props }: BackgroundProps) => {
           gradientTransform="matrix(1026.32 0 0 727.23 708.3 564.9)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#79B9A7" />
-          <stop offset="1" stopColor="#B6D2C4" />
+          <stop stopColor="#7DC3B1" />
+          <stop offset="1" stopColor="#A9D8CB" />
         </radialGradient>
         <radialGradient
           id="d"
