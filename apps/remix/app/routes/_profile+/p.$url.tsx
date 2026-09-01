@@ -1,4 +1,5 @@
 import { useOptionalSession } from '@documenso/lib/client-only/providers/session';
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { getPublicProfileByUrl } from '@documenso/lib/server-only/profile/get-public-profile-by-url';
 import { formatAvatarUrl } from '@documenso/lib/utils/avatars';
 import { canExecuteOrganisationAction } from '@documenso/lib/utils/organisations';
@@ -128,7 +129,7 @@ export default function PublicProfilePage({ loaderData }: Route.ComponentProps) 
             {!user?.id && (
               <span className="mt-2 inline-block">
                 <Trans>
-                  While waiting for them to do so you can create your own Documenso account and get started with
+                  While waiting for them to do so you can create your own {APP_NAME} account and get started with
                   document signing right away.
                 </Trans>
               </span>

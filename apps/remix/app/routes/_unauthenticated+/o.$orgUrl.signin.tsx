@@ -1,5 +1,6 @@
 import { authClient } from '@documenso/auth/client';
 import { getOptionalSession } from '@documenso/auth/server/lib/utils/get-session';
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import { prisma } from '@documenso/prisma';
 import { Button } from '@documenso/ui/primitives/button';
@@ -204,7 +205,7 @@ export default function OrganisationSignIn({ loaderData }: Route.ComponentProps)
 
         <div className="mt-1 flex items-center justify-center text-muted-foreground text-xs">
           <Link to="/signin">
-            <Trans>Return to Documenso sign in page here</Trans>
+            <Trans>Return to {APP_NAME} sign in page here</Trans>
           </Link>
         </div>
       </div>

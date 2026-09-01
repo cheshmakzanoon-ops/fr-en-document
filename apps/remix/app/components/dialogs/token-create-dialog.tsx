@@ -1,3 +1,4 @@
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import { trpc } from '@documenso/trpc/react';
 import { ZCreateApiTokenRequestSchema } from '@documenso/trpc/server/api-token-router/create-api-token.types';
@@ -171,7 +172,7 @@ export const TokenCreateDialog = ({ trigger, ...props }: TokenCreateDialogProps)
               </DialogTitle>
 
               <DialogDescription>
-                <Trans>Use API tokens to authenticate with the Documenso API.</Trans>
+                <Trans>Use API tokens to authenticate with the {APP_NAME} API.</Trans>
               </DialogDescription>
             </DialogHeader>
 

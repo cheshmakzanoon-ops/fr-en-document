@@ -68,18 +68,21 @@ module.exports = {
           foreground: 'hsl(var(--widget-foreground))',
         },
         documenso: {
-          DEFAULT: '#A2E771',
-          50: '#FFFFFF',
-          100: '#FDFFFD',
-          200: '#E7F9DA',
-          300: '#D0F3B7',
-          400: '#B9ED94',
-          500: '#A2E771',
-          600: '#83DF41',
-          700: '#66C622',
-          800: '#4D9619',
-          900: '#356611',
-          950: '#284E0D',
+          // NorthSign palette (kept under the upstream `documenso` token name so
+          // the ~40 existing `text-documenso-*`/`bg-documenso-*` utility usages
+          // keep working without touching upstream components — see BRANDING.md).
+          DEFAULT: '#0E7C66',
+          50: '#E6F4F0',
+          100: '#D5EDE6',
+          200: '#A9D8CB',
+          300: '#7DC3B1',
+          400: '#4BA98F',
+          500: '#0E7C66',
+          600: '#0D6F5B',
+          700: '#0A5C4C',
+          800: '#084739',
+          900: '#063127',
+          950: '#04201A',
         },
         dawn: {
           DEFAULT: '#aaa89f',

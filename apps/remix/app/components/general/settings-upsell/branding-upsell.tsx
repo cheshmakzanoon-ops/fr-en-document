@@ -1,4 +1,5 @@
 import { useCurrentOrganisation } from '@documenso/lib/client-only/providers/organisation';
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { Trans } from '@lingui/react/macro';
 import { motion, useReducedMotion } from 'framer-motion';
 
@@ -8,27 +9,27 @@ import { useTimedCycle } from './use-timed-cycle';
 
 const DEMO_BRANDS = [
   {
-    name: 'Documenso',
-    letter: 'D',
-    domain: 'noreply@app.documenso.com',
+    name: APP_NAME,
+    letter: 'N',
+    domain: 'noreply@northsign.ca',
     accent: '#A2E771',
     ink: '#162C07',
     tint: '#F2FBEA',
     sheen: 'rgba(162, 231, 113, 0.32)',
   },
   {
-    name: 'Documenso',
-    letter: 'D',
-    domain: 'noreply@app.documenso.com',
+    name: APP_NAME,
+    letter: 'N',
+    domain: 'noreply@northsign.ca',
     accent: '#387BC7',
     ink: '#ffffff',
     tint: '#EDF3FA',
     sheen: 'rgba(56, 123, 199, 0.28)',
   },
   {
-    name: 'Documenso',
-    letter: 'D',
-    domain: 'noreply@app.documenso.com',
+    name: APP_NAME,
+    letter: 'N',
+    domain: 'noreply@northsign.ca',
     accent: '#9747F5',
     ink: '#ffffff',
     tint: '#F4EDFE',
