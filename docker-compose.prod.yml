@@ -1,0 +1,78 @@
+# NorthSign production stack — app + PostgreSQL 16 + Caddy (auto-TLS).
+#
+# All components run on the application VM in AWS ca-central-1 (Montreal).
+#   app      — built from docker/production/Dockerfile (non-root, healthcheck)
+#   database — PostgreSQL 16, data on the VM's disk (region-pinned by construction)
+#   caddy    — reverse proxy :80/:443, Let's Encrypt auto-TLS
+#
+# Usage on the VM (see DEPLOY.md):
+#   cp .env.production.example .env      # then fill in real values
+#   chmod 600 .env
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Coolify note: this is a standard Compose v2 file. In Coolify, either keep a
+# `.env` file in the project root (as above) or paste the same variables into
+# Coolify's per-service environment UI and drop the `env_file:` line. The
+# `caddy` service can also be replaced by Coolify's built-in Traefik proxy by
+# publishing the app port instead of using `expose`.
+
+name: northsign-production
+
+services:
+  database:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      # Interpolated from the root .env (POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB).
+      POSTGRES_USER: ${POSTGRES_USER:?err}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err}
+      POSTGRES_DB: ${POSTGRES_DB:?err}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - database:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+    # Internal only — public traffic enters through Caddy.
+    expose:
+      - '3000'
+    volumes:
+      # Signing certificate (generated on the VM per SIGNING.md). Read-only.
+      - ./cert.p12:/opt/northsign/cert.p12:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/api/health >/dev/null 2>&1 || exit 1']
+      interval: 30s
+      timeout: 5s
+      start_period: 90s
+      retries: 3
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - '80:80'       # HTTP-01 ACME challenge + redirects
+      - '443:443'     # HTTPS
+      - '443:443/udp' # HTTP/3 (optional but harmless)
+    volumes:
+      - ./docker/production/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  database:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,25 @@
+# NorthSign — Caddy reverse proxy (docker/production/Caddyfile)
+#
+# Auto-TLS via Let's Encrypt (HTTP-01 challenge on :80). Caddy stores the
+# issued certificates in the caddy_data volume. The first request after
+# startup triggers issuance; allow ~1-2 minutes and check
+# `docker compose -f docker-compose.prod.yml logs caddy` if issuance stalls
+# (usually a DNS record that has not propagated yet).
+#
+# IMPORTANT: the app A record must resolve publicly to this VM BEFORE Caddy
+# can issue a certificate (see docs/runbooks/03-dns.md).
+
+{
+	# ACME account contact — replace with a monitored mailbox (e.g. ops@northsign.ca).
+	email ops@northsign.ca
+}
+
+# Primary application host.
+app.northsign.ca {
+	reverse_proxy app:3000
+}
+
+# Apex and www redirect to the app host.
+northsign.ca, www.northsign.ca {
+	redir https://app.northsign.ca{uri} permanent
+}
