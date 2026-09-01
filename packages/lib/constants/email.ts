@@ -1,7 +1,8 @@
 import { env } from '../utils/env';
+import { EMAIL_FROM_ADDRESS, EMAIL_FROM_NAME } from './brand';
 
-export const FROM_ADDRESS = env('NEXT_PRIVATE_SMTP_FROM_ADDRESS') || 'noreply@northsign.ca';
-export const FROM_NAME = env('NEXT_PRIVATE_SMTP_FROM_NAME') || 'NorthSign';
+export const FROM_ADDRESS = env('NEXT_PRIVATE_SMTP_FROM_ADDRESS') || EMAIL_FROM_ADDRESS;
+export const FROM_NAME = env('NEXT_PRIVATE_SMTP_FROM_NAME') || EMAIL_FROM_NAME;
 
 export const DOCUMENSO_INTERNAL_EMAIL = {
   name: FROM_NAME,

@@ -1,3 +1,4 @@
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { prisma } from '@documenso/prisma';
 import type { User } from '@prisma/client';
 import { base32 } from '@scure/base';
@@ -11,7 +12,7 @@ type SetupTwoFactorAuthenticationOptions = {
   user: Pick<User, 'id' | 'email'>;
 };
 
-const ISSUER = 'Documenso';
+const ISSUER = APP_NAME;
 
 export const setupTwoFactorAuthentication = async ({ user }: SetupTwoFactorAuthenticationOptions) => {
   const key = DOCUMENSO_ENCRYPTION_KEY;
