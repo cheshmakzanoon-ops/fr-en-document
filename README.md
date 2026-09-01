@@ -1,5 +1,32 @@
 <img src="https://github.com/documenso/documenso/assets/13398220/a643571f-0239-46a6-a73e-6bef38d1228b" alt="Documenso Logo">
 
+> [!IMPORTANT]
+> ### Fork notice & product vision
+> This repository is a **fork of [Documenso](https://github.com/documenso/documenso)**,
+> licensed under **AGPL-3.0**. Upstream's license, copyright, and attribution are
+> preserved in full — see [LICENSE](./LICENSE). We are grateful to the Documenso
+> team and community; none of this would exist without their work.
+>
+> **Product vision:** we are building a **Canadian-hosted, bilingual (EN/FR)
+> document-signing SaaS for Canadian SMBs**, positioned as a PIPEDA/Law 25
+> compliant DocuSign alternative — with data residency in Canada and French
+> support for Québec, on top of the open-source foundation Documenso provides.
+>
+> The roadmap for this fork is tracked in [PHASES.md](./PHASES.md), and every
+> technical decision is recorded in [DECISIONS.md](./DECISIONS.md).
+
+---
+
+### Attribution
+
+This product is built on [Documenso](https://github.com/documenso/documenso), the open-source
+DocuSign alternative, under the **AGPL-3.0** license. Documenso's copyright, license
+(`LICENSE`), and attribution are preserved in full in this repository, and the UI
+footer carries the line: **"NorthSign — built on Documenso, open source"**. We are
+founded on their work and remain grateful to the Documenso team and community.
+
+---
+
 <p align="center" style="margin-top: 20px">
   <p align="center">
   The Open Source DocuSign Alternative.
@@ -168,7 +195,7 @@ We support DevContainers for VSCode. [Click here to get started.](https://vscode
 
 ### Video walkthrough
 
-If you're a visual learner and prefer to watch a video walkthrough of setting up Documenso locally, check out this video:
+If you're a visual learner and prefer to watch a video walkthrough of setting up Documenso locally, check out this video walkthrough of setting up Documenso locally:
 
 [![Watch the video](https://img.youtube.com/vi/Y0ppIQrEnZs/hqdefault.jpg)](https://youtu.be/Y0ppIQrEnZs)
 
