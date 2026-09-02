@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { PDFDocument } from '@cantoo/pdf-lib';
 import { finalizeTspEnvelopeCompletion } from '@documenso/ee/server-only/signing/csc/finalize-tsp-completion';
+import { getI18nInstance } from '@documenso/lib/client-only/providers/i18n-server';
+import { APP_NAME } from '@documenso/lib/constants/brand';
 import { addRejectionStampToPdf } from '@documenso/lib/server-only/pdf/add-rejection-stamp-to-pdf';
 import { generateAuditLogPdf } from '@documenso/lib/server-only/pdf/generate-audit-log-pdf';
 import { generateCertificatePdf } from '@documenso/lib/server-only/pdf/generate-certificate-pdf';
@@ -8,7 +10,8 @@ import { getLastPageDimensions } from '@documenso/lib/server-only/pdf/get-page-s
 import { prisma } from '@documenso/prisma';
 import { signPdf } from '@documenso/signing';
 import { PDF } from '@libpdf/core';
-import type { DocumentData, Envelope, EnvelopeItem, Field } from '@prisma/client';
+import { msg } from '@lingui/macro';
+import type { DocumentData, DocumentMeta, Envelope, EnvelopeItem, Field } from '@prisma/client';
 import { DocumentStatus, EnvelopeType, RecipientRole, SigningStatus, WebhookTriggerEvents } from '@prisma/client';
 import { nanoid } from 'nanoid';
 import { groupBy } from 'remeda';
@@ -358,7 +361,9 @@ export const run = async ({ payload, io }: { payload: TSealDocumentJobDefinition
 };
 
 type DecorateAndSignPdfOptions = {
-  envelope: Pick<Envelope, 'id' | 'title' | 'useLegacyFieldInsertion' | 'internalVersion'>;
+  envelope: Pick<Envelope, 'id' | 'title' | 'useLegacyFieldInsertion' | 'internalVersion'> & {
+    documentMeta: DocumentMeta;
+  };
   envelopeItem: EnvelopeItem & { documentData: DocumentData };
   envelopeItemFields: Field[];
   isRejected: boolean;
@@ -388,9 +393,12 @@ const decorateAndSignPdf = async ({
   // Upgrade to PDF 1.7 for better compatibility with signing
   pdfDoc.upgradeVersion('1.7');
 
+  // Localized PDF text (signature dictionary reason + rejection stamp)
+  const docI18n = await getI18nInstance(envelope.documentMeta.language);
+
   // Add rejection stamp if the document is rejected
   if (isRejected) {
-    await addRejectionStampToPdf(pdfDoc, rejectionReason);
+    await addRejectionStampToPdf(pdfDoc, rejectionReason, docI18n._(msg`DOCUMENT REJECTED`));
   }
 
   if (certificateDoc) {
@@ -488,7 +496,10 @@ const decorateAndSignPdf = async ({
 
   pdfDoc = await PDF.load(await pdfDoc.save({ useXRefStream: true }));
 
-  const pdfBytes = await signPdf({ pdf: pdfDoc });
+  const pdfBytes = await signPdf({
+    pdf: pdfDoc,
+    reason: docI18n._(msg`Signed by ${APP_NAME}`),
+  });
 
   const { name } = path.parse(envelopeItem.title);
 
