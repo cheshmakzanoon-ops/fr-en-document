@@ -1,0 +1,26 @@
+name: 'Bisect Bottom'
+on:
+  push:
+    branches: ['scratch/ci-bisect']
+
+services:
+  postgres:
+    image: postgres:16
+    env:
+      POSTGRES_USER: documenso
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: documenso
+    ports:
+      - 54320:5432
+    options: >-
+      --health-cmd "pg_isready -U documenso -d documenso"
+      --health-interval 5s
+      --health-timeout 5s
+      --health-retries 10
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hello
+        run: echo "e2e half parses"

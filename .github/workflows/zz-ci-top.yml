@@ -1,0 +1,30 @@
+name: 'Bisect Top'
+on:
+  push:
+    branches: ['scratch/ci-bisect']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: 'Lint & Typecheck (baseline gates)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - uses: ./.github/actions/node-install
+
+      - name: Biome check (baseline-count gate: 5 errors / 842 warnings)
+        run: node scripts/ci-biome-baseline.cjs
+
+      - name: TypeScript (known-errors allowlist: 3 Prisma-drift files)
+        run: node scripts/ci-tsc-allowlist.cjs
