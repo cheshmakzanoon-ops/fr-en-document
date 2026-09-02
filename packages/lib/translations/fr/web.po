@@ -385,8 +385,12 @@ msgid "{APP_DESCRIPTION} {APP_TAGLINE}. Built on {0}."
 msgstr "NorthSign — signature électronique hébergée au Canada, adaptée aux PME canadiennes. Signature de documents conforme à la LPRPDE et à la Loi 25, résidence des données au Canada et soutien complet en français pour le Québec. Basé sur {0}."
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-msgid "{APP_NAME} will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
-msgstr "{APP_NAME} supprimera <0>tous vos documents</0>, ainsi que tous vos documents signés, vos signatures et toutes les autres ressources appartenant à votre compte."
+#~ msgid "{APP_NAME} will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
+#~ msgstr "{APP_NAME} supprimera <0>tous vos documents</0>, ainsi que tous vos documents signés, vos signatures et toutes les autres ressources appartenant à votre compte."
+
+#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
+msgid "{APP_NAME} will permanently delete your <0>draft documents and templates</0>, along with your sessions, API tokens, and other account resources. Documents you sent for signature — including completed ones — are <1>not destroyed</1>: they are transferred to a restricted service account and retained as legal records that co-signers may rely on. Consider downloading your data export first."
+msgstr "{APP_NAME} supprimera définitivement vos <0>brouillons de documents et modèles</0>, ainsi que vos sessions, jetons d’API et autres ressources de compte. Les documents que vous avez envoyés pour signature — y compris les documents complétés — ne sont <1>pas détruits</1> : ils sont transférés à un compte de service restreint et conservés comme registres juridiques sur lesquels les cosignataires peuvent s’appuyer. Pensez à télécharger d’abord votre exportation de données."
 
 #: apps/remix/app/utils/meta.ts
 msgid "{APP_NAME}, Canadian-hosted e-signatures, DocuSign alternative, document signing, PIPEDA, Law 25, bilingual EN/FR, data residency Canada, open source"
@@ -4117,8 +4121,12 @@ msgid "Delete Webhook"
 msgstr "Supprimer le Webhook"
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-msgid "Delete your account and all its contents, including completed documents. This action is irreversible and will cancel your subscription, so proceed with caution."
-msgstr "Supprimez votre compte et tout son contenu, y compris les documents complétés. Cette action est irréversible et annulera votre abonnement, soyez prudent."
+#~ msgid "Delete your account and all its contents, including completed documents. This action is irreversible and will cancel your subscription, so proceed with caution."
+#~ msgstr "Supprimez votre compte et tout son contenu, y compris les documents complétés. Cette action est irréversible et annulera votre abonnement, soyez prudent."
+
+#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
+msgid "Delete your account. Documents you own that other parties rely on are kept as legal records (moved to a restricted service account); drafts and templates are removed. This action is irreversible and will cancel your subscription, so proceed with caution."
+msgstr "Supprimez votre compte. Les documents dont vous êtes titulaire et sur lesquels d’autres parties s’appuient sont conservés comme registres juridiques (transférés à un compte de service restreint); les brouillons et modèles sont supprimés. Cette action est irréversible et annulera votre abonnement; procédez avec prudence."
 
 #: apps/remix/app/routes/_authenticated+/admin+/documents.$id.tsx
 #: apps/remix/app/routes/_internal+/[__htmltopdf]+/audit-log.tsx
@@ -4574,6 +4582,7 @@ msgid "Document is using legacy field insertion"
 msgstr "Le document utilise l'insertion de champ héritée"
 
 #: apps/remix/app/components/general/admin-global-settings-section.tsx
+#: apps/remix/app/components/general/envelope-editor/envelope-editor-recipient-form.tsx
 msgid "Document language"
 msgstr "Langue du document"
 
@@ -4906,6 +4915,10 @@ msgstr "Terminé"
 msgid "Download"
 msgstr "Télécharger"
 
+#: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
+msgid "Download a machine-readable copy of the personal information we hold about you — your profile, consent records, security log, and the documents you own (metadata and recipients). PDF files themselves can be downloaded from the documents page."
+msgstr "Téléchargez une copie lisible par machine des renseignements personnels que nous détenons à votre sujet — votre profil, vos registres de consentement, votre journal de sécurité et les documents dont vous êtes titulaire (métadonnées et destinataires). Les fichiers PDF eux-mêmes peuvent être téléchargés depuis la page des documents."
+
 #: apps/remix/app/components/general/document/document-audit-log-download-button.tsx
 #: apps/remix/app/routes/_authenticated+/admin+/documents.$id.tsx
 msgid "Download Audit Logs"
@@ -4914,6 +4927,10 @@ msgstr "Télécharger les journaux d'audit"
 #: apps/remix/app/components/general/document/document-certificate-download-button.tsx
 msgid "Download Certificate"
 msgstr "Télécharger le certificat"
+
+#: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
+msgid "Download data export"
+msgstr "Télécharger l’exportation de données"
 
 #: apps/remix/app/components/dialogs/envelopes-bulk-download-dialog.tsx
 msgid "Download Documents"
@@ -5817,6 +5834,10 @@ msgstr "Expire dans"
 msgid "Expires in {0}"
 msgstr "Expire dans {0}"
 
+#: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
+msgid "Export your data"
+msgstr "Exporter vos données"
+
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
 #: packages/ui/primitives/document-flow/add-settings.tsx
 #: packages/ui/primitives/template-flow/add-template-settings.tsx
@@ -6538,6 +6559,10 @@ msgstr "Je dois recevoir une copie de ce document"
 msgid "I am the owner of this document"
 msgstr "Je suis le propriétaire de ce document"
 
+#: apps/remix/app/components/forms/signup.tsx
+msgid "I have read and accept the <0>Terms of Service</0> and the <1>Privacy Policy</1>, including how my data is stored in Canada."
+msgstr "J’ai lu et j’accepte les <0>conditions d’utilisation</0> et la <1>politique de confidentialité</1>, y compris la façon dont mes données sont conservées au Canada."
+
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
 msgid "I understand that I am providing my credentials to a 3rd party service configured by this organisation"
 msgstr "Je comprends que je fournis mes identifiants à un service tiers configuré par cette organisation"
@@ -6989,6 +7014,8 @@ msgstr "Dernière signature"
 
 #: apps/remix/app/routes/_authenticated+/admin+/documents._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.logs.tsx
+#: apps/remix/app/routes/privacy.tsx
+#: apps/remix/app/routes/terms.tsx
 msgid "Last updated"
 msgstr "Dernière mise à jour"
 
@@ -8924,6 +8951,10 @@ msgstr "Premier plan principal"
 msgid "Privacy Policy"
 msgstr "Politique de confidentialité"
 
+#: apps/remix/app/routes/privacy.tsx
+msgid "Privacy Policy version"
+msgstr "Version de la politique de confidentialité"
+
 #: apps/remix/app/components/general/template/template-type.tsx
 #: apps/remix/app/components/tables/templates-table.tsx
 #: packages/ui/components/template/template-type-select.tsx
@@ -10257,6 +10288,10 @@ msgstr "Envoyer l’enveloppe"
 msgid "Send first reminder after"
 msgstr "Envoyer le premier rappel après"
 
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Send me occasional product news and offers by email. Optional — you can unsubscribe at any time."
+msgstr "Envoyez-moi occasionnellement des nouvelles du produit et des offres par courriel. Facultatif — vous pouvez vous désabonner en tout temps."
+
 #: apps/remix/app/components/forms/email-preferences-form.tsx
 msgid "Send on Behalf of Team"
 msgstr "Envoyer au nom de l'équipe"
@@ -11486,6 +11521,10 @@ msgstr "Modèles partiellement supprimés"
 #: apps/remix/app/routes/terms.tsx
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
+
+#: apps/remix/app/routes/terms.tsx
+msgid "Terms of Service version"
+msgstr "Version des conditions d’utilisation"
 
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings.webhooks.$id._index.tsx
 msgid "Test"
@@ -13407,6 +13446,11 @@ msgstr "Vérifiez votre courriel pour importer des documents."
 msgid "Verify your team email address"
 msgstr "Vérifiez votre adresse courriel d'équipe"
 
+#: apps/remix/app/routes/privacy.tsx
+#: apps/remix/app/routes/terms.tsx
+msgid "Version"
+msgstr "Version"
+
 #: apps/remix/app/components/forms/editor/editor-field-checkbox-form.tsx
 #: apps/remix/app/components/forms/editor/editor-field-radio-form.tsx
 #: packages/ui/primitives/document-flow/field-items-advanced-settings/checkbox-field.tsx
@@ -14776,6 +14820,10 @@ msgstr "Vous avez vérifié votre adresse courriel pour <0>{teamName}</0>."
 #: packages/lib/utils/document-audit-logs.ts
 msgid "You moved the document to team"
 msgstr "Vous avez déplacé le document vers l'équipe"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "You must accept the Terms of Service and Privacy Policy to create an account"
+msgstr "Vous devez accepter les conditions d’utilisation et la politique de confidentialité pour créer un compte"
 
 #: apps/remix/app/components/dialogs/admin-organisation-delete-dialog.tsx
 #: apps/remix/app/components/dialogs/organisation-delete-dialog.tsx

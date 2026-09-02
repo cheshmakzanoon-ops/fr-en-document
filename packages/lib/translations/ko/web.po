@@ -385,7 +385,11 @@ msgid "{APP_DESCRIPTION} {APP_TAGLINE}. Built on {0}."
 msgstr ""
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-msgid "{APP_NAME} will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
+#~ msgid "{APP_NAME} will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
+#~ msgstr ""
+
+#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
+msgid "{APP_NAME} will permanently delete your <0>draft documents and templates</0>, along with your sessions, API tokens, and other account resources. Documents you sent for signature — including completed ones — are <1>not destroyed</1>: they are transferred to a restricted service account and retained as legal records that co-signers may rely on. Consider downloading your data export first."
 msgstr ""
 
 #: apps/remix/app/utils/meta.ts
@@ -4117,8 +4121,12 @@ msgid "Delete Webhook"
 msgstr "웹훅 삭제"
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-msgid "Delete your account and all its contents, including completed documents. This action is irreversible and will cancel your subscription, so proceed with caution."
-msgstr "계정 및 완료된 문서를 포함한 모든 콘텐츠가 삭제됩니다. 이 작업은 되돌릴 수 없으며, 구독도 취소되므로 신중히 진행하세요."
+#~ msgid "Delete your account and all its contents, including completed documents. This action is irreversible and will cancel your subscription, so proceed with caution."
+#~ msgstr "계정 및 완료된 문서를 포함한 모든 콘텐츠가 삭제됩니다. 이 작업은 되돌릴 수 없으며, 구독도 취소되므로 신중히 진행하세요."
+
+#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
+msgid "Delete your account. Documents you own that other parties rely on are kept as legal records (moved to a restricted service account); drafts and templates are removed. This action is irreversible and will cancel your subscription, so proceed with caution."
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/admin+/documents.$id.tsx
 #: apps/remix/app/routes/_internal+/[__htmltopdf]+/audit-log.tsx
@@ -4574,6 +4582,7 @@ msgid "Document is using legacy field insertion"
 msgstr "문서가 기존(레거시) 필드 삽입 방식을 사용하고 있습니다."
 
 #: apps/remix/app/components/general/admin-global-settings-section.tsx
+#: apps/remix/app/components/general/envelope-editor/envelope-editor-recipient-form.tsx
 msgid "Document language"
 msgstr "문서 언어"
 
@@ -4906,6 +4915,10 @@ msgstr ""
 msgid "Download"
 msgstr "다운로드"
 
+#: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
+msgid "Download a machine-readable copy of the personal information we hold about you — your profile, consent records, security log, and the documents you own (metadata and recipients). PDF files themselves can be downloaded from the documents page."
+msgstr ""
+
 #: apps/remix/app/components/general/document/document-audit-log-download-button.tsx
 #: apps/remix/app/routes/_authenticated+/admin+/documents.$id.tsx
 msgid "Download Audit Logs"
@@ -4914,6 +4927,10 @@ msgstr "감사 로그 다운로드"
 #: apps/remix/app/components/general/document/document-certificate-download-button.tsx
 msgid "Download Certificate"
 msgstr "인증서 다운로드"
+
+#: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
+msgid "Download data export"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/envelopes-bulk-download-dialog.tsx
 msgid "Download Documents"
@@ -5817,6 +5834,10 @@ msgstr ""
 msgid "Expires in {0}"
 msgstr "{0} 후 만료"
 
+#: apps/remix/app/routes/_authenticated+/settings+/profile.tsx
+msgid "Export your data"
+msgstr ""
+
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
 #: packages/ui/primitives/document-flow/add-settings.tsx
 #: packages/ui/primitives/template-flow/add-template-settings.tsx
@@ -6538,6 +6559,10 @@ msgstr "저는 이 문서의 사본을 받아야 합니다."
 msgid "I am the owner of this document"
 msgstr "이 문서의 소유자입니다"
 
+#: apps/remix/app/components/forms/signup.tsx
+msgid "I have read and accept the <0>Terms of Service</0> and the <1>Privacy Policy</1>, including how my data is stored in Canada."
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
 msgid "I understand that I am providing my credentials to a 3rd party service configured by this organisation"
 msgstr "이 조직에서 구성한 제3자 서비스에 내 자격 증명을 제공하는 것임을 이해합니다"
@@ -6989,6 +7014,8 @@ msgstr "마지막 서명 시각"
 
 #: apps/remix/app/routes/_authenticated+/admin+/documents._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.logs.tsx
+#: apps/remix/app/routes/privacy.tsx
+#: apps/remix/app/routes/terms.tsx
 msgid "Last updated"
 msgstr "마지막 업데이트"
 
@@ -8924,6 +8951,10 @@ msgstr "기본 전경"
 msgid "Privacy Policy"
 msgstr ""
 
+#: apps/remix/app/routes/privacy.tsx
+msgid "Privacy Policy version"
+msgstr ""
+
 #: apps/remix/app/components/general/template/template-type.tsx
 #: apps/remix/app/components/tables/templates-table.tsx
 #: packages/ui/components/template/template-type-select.tsx
@@ -10257,6 +10288,10 @@ msgstr "봉투 보내기"
 msgid "Send first reminder after"
 msgstr "첫 알림 전송 시점"
 
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Send me occasional product news and offers by email. Optional — you can unsubscribe at any time."
+msgstr ""
+
 #: apps/remix/app/components/forms/email-preferences-form.tsx
 msgid "Send on Behalf of Team"
 msgstr "팀을 대신해 발송"
@@ -11485,6 +11520,10 @@ msgstr "템플릿이 일부만 삭제되었습니다"
 
 #: apps/remix/app/routes/terms.tsx
 msgid "Terms of Service"
+msgstr ""
+
+#: apps/remix/app/routes/terms.tsx
+msgid "Terms of Service version"
 msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings.webhooks.$id._index.tsx
@@ -13407,6 +13446,11 @@ msgstr "문서를 업로드하려면 이메일을 인증해야 합니다."
 msgid "Verify your team email address"
 msgstr "팀 이메일 주소를 인증하세요."
 
+#: apps/remix/app/routes/privacy.tsx
+#: apps/remix/app/routes/terms.tsx
+msgid "Version"
+msgstr ""
+
 #: apps/remix/app/components/forms/editor/editor-field-checkbox-form.tsx
 #: apps/remix/app/components/forms/editor/editor-field-radio-form.tsx
 #: packages/ui/primitives/document-flow/field-items-advanced-settings/checkbox-field.tsx
@@ -14776,6 +14820,10 @@ msgstr ""
 #: packages/lib/utils/document-audit-logs.ts
 msgid "You moved the document to team"
 msgstr "문서를 팀으로 이동했습니다"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "You must accept the Terms of Service and Privacy Policy to create an account"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/admin-organisation-delete-dialog.tsx
 #: apps/remix/app/components/dialogs/organisation-delete-dialog.tsx
