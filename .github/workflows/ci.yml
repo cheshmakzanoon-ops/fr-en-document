@@ -28,10 +28,10 @@ jobs:
 
       - uses: ./.github/actions/node-install
 
-      - name: Biome check (baseline-count gate: 5 errors / 842 warnings)
+      - name: "Biome check (baseline-count gate: 5 errors / 842 warnings)"
         run: node scripts/ci-biome-baseline.cjs
 
-      - name: TypeScript (known-errors allowlist: 3 Prisma-drift files)
+      - name: "TypeScript (known-errors allowlist: 3 Prisma-drift files)"
         run: node scripts/ci-tsc-allowlist.cjs
 
   e2e:
