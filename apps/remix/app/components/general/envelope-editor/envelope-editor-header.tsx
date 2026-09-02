@@ -72,7 +72,7 @@ export default function EnvelopeEditorHeader() {
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 flex-1 items-center space-x-4">
           {editorConfig.embedded?.customBrandingLogo ? (
-            <img src={`/api/branding/logo/team/${envelope.teamId}`} alt="Logo" className="h-6 w-auto" />
+            <img src={`/api/branding/logo/team/${envelope.teamId}`} alt={t`Logo`} className="h-6 w-auto" />
           ) : (
             <Link to="/">
               <BrandingLogo className="h-6 w-auto" />

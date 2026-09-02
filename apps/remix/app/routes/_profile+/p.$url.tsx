@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@documenso/ui/primitives/av
 import { Button } from '@documenso/ui/primitives/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@documenso/ui/primitives/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@documenso/ui/primitives/tooltip';
+import { msg } from '@lingui/core/macro';
+import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { FileIcon } from 'lucide-react';
 import { DateTime } from 'luxon';
@@ -51,6 +53,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 export default function PublicProfilePage({ loaderData }: Route.ComponentProps) {
   const { publicProfile } = loaderData;
 
+  const { _ } = useLingui();
+
   const { profile, templates } = publicProfile;
 
   const { sessionData } = useOptionalSession();
@@ -86,7 +90,7 @@ export default function PublicProfilePage({ loaderData }: Route.ComponentProps) 
               <TooltipTrigger>
                 <img
                   className="ml-2 flex items-center justify-center"
-                  alt="Profile badge"
+                  alt={_(msg`Profile badge`)}
                   src={BADGE_DATA[publicProfile.badge.type].imageSrc}
                   height={24}
                   width={24}
@@ -96,7 +100,7 @@ export default function PublicProfilePage({ loaderData }: Route.ComponentProps) 
               <TooltipContent className="!pl-3 !pr-3.5 flex flex-row items-start py-2">
                 <img
                   className="mt-0.5"
-                  alt="Profile badge"
+                  alt={_(msg`Profile badge`)}
                   src={BADGE_DATA[publicProfile.badge.type].imageSrc}
                   height={24}
                   width={24}

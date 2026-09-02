@@ -370,7 +370,7 @@ export const SignUpForm = ({
                   disabled={isSubmitting}
                   onClick={onSignUpWithMicrosoftClick}
                 >
-                  <img className="mr-2 h-4 w-4" alt="Microsoft Logo" src={'/static/microsoft.svg'} />
+                  <img className="mr-2 h-4 w-4" alt={_(msg`Microsoft Logo`)} src={'/static/microsoft.svg'} />
                   <Trans>Sign Up with Microsoft</Trans>
                 </Button>
               )}

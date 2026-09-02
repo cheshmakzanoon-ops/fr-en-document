@@ -10,6 +10,7 @@ import { Badge } from '@documenso/ui/primitives/badge';
 import { FRIENDLY_FIELD_TYPE } from '@documenso/ui/primitives/document-flow/types';
 import { ElementVisible } from '@documenso/ui/primitives/element-visible';
 import { PopoverHover } from '@documenso/ui/primitives/popover';
+import { msg } from '@lingui/macro';
 import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import type { DocumentMeta, Field } from '@prisma/client';
@@ -153,7 +154,7 @@ export const DocumentReadOnlyFields = ({
                     <button
                       className="absolute top-0 right-0 my-1 p-2 focus:outline-none focus-visible:ring-0"
                       onClick={() => handleHideField(field.secondaryId)}
-                      title="Hide field"
+                      title={_(msg`Hide field`)}
                     >
                       <EyeOffIcon className="h-3 w-3" />
                     </button>

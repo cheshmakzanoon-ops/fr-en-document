@@ -431,7 +431,7 @@ export const SignInForm = ({
                   disabled={isSubmitting}
                   onClick={onSignInWithMicrosoftClick}
                 >
-                  <img className="mr-2 h-4 w-4" alt="Microsoft Logo" src={'/static/microsoft.svg'} />
+                  <img className="mr-2 h-4 w-4" alt={_(msg`Microsoft Logo`)} src={'/static/microsoft.svg'} />
                   Microsoft
                 </Button>
               )}

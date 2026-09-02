@@ -1,9 +1,21 @@
 import { NEXT_PUBLIC_WEBAPP_URL } from '@documenso/lib/constants/app';
 import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE, UPSTREAM_REPO_URL } from '@documenso/lib/constants/brand';
 import { i18n, type MessageDescriptor } from '@lingui/core';
+import { msg } from '@lingui/core/macro';
 
 export const appMetaTags = (title?: MessageDescriptor) => {
-  const description = `${APP_DESCRIPTION} ${APP_TAGLINE}. Built on ${UPSTREAM_REPO_URL.replace('https://', '')}.`;
+  // Phase 4: meta copy routes through the i18n layer. The marketing constants
+  // are interpolated as ICU variables so each locale can supply its own copy
+  // (fr-CA in the catalog); en output is unchanged from before.
+  const description = i18n._(
+    msg`${APP_DESCRIPTION} ${APP_TAGLINE}. Built on ${UPSTREAM_REPO_URL.replace('https://', '')}.`,
+  );
+
+  const keywords = i18n._(
+    msg`${APP_NAME}, Canadian-hosted e-signatures, DocuSign alternative, document signing, PIPEDA, Law 25, bilingual EN/FR, data residency Canada, open source`,
+  );
+
+  const tagline = i18n._(msg`Canadian-hosted e-signatures`);
 
   return [
     {
@@ -15,7 +27,7 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     },
     {
       name: 'keywords',
-      content: `${APP_NAME}, Canadian-hosted e-signatures, DocuSign alternative, document signing, PIPEDA, Law 25, bilingual EN/FR, data residency Canada, open source`,
+      content: keywords,
     },
     {
       name: 'author',
@@ -27,7 +39,7 @@ export const appMetaTags = (title?: MessageDescriptor) => {
     },
     {
       property: 'og:title',
-      content: `${APP_NAME} - ${APP_TAGLINE}`,
+      content: `${APP_NAME} - ${tagline}`,
     },
     {
       property: 'og:description',

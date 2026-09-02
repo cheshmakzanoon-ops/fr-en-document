@@ -276,7 +276,7 @@ export function BrandingPreferencesForm({
                   <div className="flex flex-col gap-4">
                     <div className="relative h-48 w-full overflow-hidden rounded-lg border border-border bg-background">
                       {previewUrl ? (
-                        <img src={previewUrl} alt="Logo preview" className="h-full w-full object-contain p-4" />
+                        <img src={previewUrl} alt={t`Logo preview`} className="h-full w-full object-contain p-4" />
                       ) : (
                         <div className="relative flex h-full w-full items-center justify-center bg-muted/20 text-muted-foreground text-sm dark:bg-muted">
                           <Trans>Please upload a logo</Trans>
