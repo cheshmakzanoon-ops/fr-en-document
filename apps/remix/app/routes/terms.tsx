@@ -1,48 +1,64 @@
-import { APP_NAME, SUPPORT_EMAIL_ADDRESS } from '@documenso/lib/constants/brand';
+import { TERMS_VERSION } from '@documenso/lib/constants/brand';
 import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 
+import { getLocaleFromRequest } from '~/storage/lang-cookie.server';
+import { DRAFT_BANNER_EN, DRAFT_BANNER_FR, type LegalContent, TERMS_EN, TERMS_FR } from '~/utils/legal-content';
 import { appMetaTags } from '~/utils/meta';
+
+import type { Route } from './+types/terms';
 
 export function meta() {
   return appMetaTags(msg`Terms of Service`);
 }
 
-export default function TermsPage() {
+const CONTENT: Record<'en' | 'fr', LegalContent> = {
+  en: TERMS_EN,
+  fr: TERMS_FR,
+};
+
+export async function loader({ request }: Route.LoaderArgs) {
+  // Same request-level resolution as the root loader (?lang= > cookie >
+  // Accept-Language > en) so /terms?lang=fr renders French server-side.
+  const locale = await getLocaleFromRequest(request);
+
+  return { lang: locale.startsWith('fr') ? ('fr' as const) : ('en' as const) };
+}
+
+export default function TermsPage({ loaderData }: Route.ComponentProps) {
+  const { lang } = loaderData;
+  const content = CONTENT[lang];
+  const draftBanner = lang === 'fr' ? DRAFT_BANNER_FR : DRAFT_BANNER_EN;
+
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-16">
-      <p className="font-semibold text-primary text-sm uppercase">DRAFT</p>
-      <h1 className="mt-2 font-bold text-3xl">Terms of Service</h1>
+      <div className="rounded-lg border-2 border-amber-500 bg-amber-50 px-4 py-3 dark:border-amber-400 dark:bg-amber-950">
+        <p className="font-semibold text-amber-700 text-sm dark:text-amber-300">⚠️ {draftBanner}</p>
+      </div>
+
+      <h1 className="mt-8 font-bold text-3xl">{content.title}</h1>
       <p className="mt-2 text-muted-foreground text-sm">
-        <strong>DRAFT — Phase 5 will finalize.</strong> This page is a placeholder: the final Terms of Service
-        (including PIPEDA / Law 25 compliant language) will be drafted in Phase 5 and reviewed by counsel before launch.
+        <Trans>Last updated</Trans>: {content.lastUpdated} · v{content.version}
       </p>
 
       <div className="mt-8 space-y-6 text-muted-foreground text-sm leading-relaxed">
-        <section>
-          <h2 className="mb-2 font-semibold text-base text-foreground">1. Introduction</h2>
-          <p>
-            Welcome to {APP_NAME}. These Terms of Service will govern your use of the {APP_NAME} electronic signature
-            platform (the &ldquo;Service&rdquo;). This placeholder will be replaced with the finalized terms.
-          </p>
-        </section>
+        {content.sections.map((section) => (
+          <section key={section.heading}>
+            <h2 className="mb-2 font-semibold text-base text-foreground">{section.heading}</h2>
+            {section.body.map((paragraph, index) => (
+              <p key={index} className={index > 0 ? 'mt-3' : undefined}>
+                {paragraph}
+              </p>
+            ))}
+          </section>
+        ))}
 
         <section>
-          <h2 className="mb-2 font-semibold text-base text-foreground">2. Placeholder sections</h2>
+          <h2 className="mb-2 font-semibold text-base text-foreground">
+            <Trans>Version</Trans>
+          </h2>
           <p>
-            Account registration, acceptable use, electronic signatures, fees, intellectual property, warranties,
-            liability, termination, governing law (Quebec/Canada) and dispute resolution will be detailed here in Phase
-            5.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 font-semibold text-base text-foreground">3. Contact</h2>
-          <p>
-            Questions about these terms can be sent to{' '}
-            <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`} className="text-primary underline underline-offset-2">
-              {SUPPORT_EMAIL_ADDRESS}
-            </a>
-            .
+            <Trans>Terms of Service version</Trans>: {TERMS_VERSION}
           </p>
         </section>
       </div>

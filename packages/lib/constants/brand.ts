@@ -24,6 +24,22 @@ export const APP_DESCRIPTION =
 /** Support inbox shown in empty states, errors, and the app footer. */
 export const SUPPORT_EMAIL_ADDRESS = 'support@northsign.ca';
 
+/** Privacy office inbox — DSAR intake, complaints, and Law 25 requests (Step 2/4). */
+export const PRIVACY_EMAIL_ADDRESS = 'privacy@northsign.ca';
+
+/**
+ * The data-residency claim, quoted verbatim from DEPLOYMENT.md §1. Legal
+ * pages must render exactly this sentence — do not paraphrase it.
+ */
+export const DATA_RESIDENCY_CLAIM =
+  'NorthSign keeps data at rest and document processing in AWS ca-central-1, Montreal.';
+
+/** Current Terms of Service version shown in the /terms footer (Step 2). */
+export const TERMS_VERSION = '1.0-draft';
+
+/** Current Privacy Policy version shown in the /privacy footer (Step 2). */
+export const PRIVACY_VERSION = '1.0-draft';
+
 /** Display name used as the transactional email sender (nodemailer "from" name). */
 export const EMAIL_FROM_NAME = 'NorthSign';
 
