@@ -398,3 +398,65 @@
   inherit option); no new msgids. E2E and runtime QA (recipient-locale
   email received in the chosen language, inherit default unchanged) rides
   the Phase 5 operator QA pass; fr-CA translations pre-exist from Phase 4.
+
+---
+
+## 2026-09-02 — Phase 5.5: CI + automated E2E verification
+
+### D-028: Baseline-count scripting for lint/tsc gates (never raise the baseline)
+- **Decision:** CI does not run raw `biome check .` or a blanket
+  `tsc --noEmit`; it runs two count-compare scripts. Biome fails only when a
+  run exceeds the recorded baseline of **5 errors / 842 warnings**
+  (`scripts/ci-biome-baseline.cjs`), and on excess it self-audits the
+  offending file list and hard-fails if any repo-owned file (the northsign
+  e2e suite, CI scripts, the northsign playwright config) carries a new
+  diagnostic. TypeScript fails only on errors outside a known-errors
+  allowlist of the 3 pre-existing Prisma-drift files in
+  `packages/lib/server-only/` (`get-completed-fields-for-document.ts`,
+  `get-active-subscriptions-by-user-id.ts`,
+  `find-organisation-invoices.ts`) — note the allowlist file set was
+  re-verified this session and differs from the file names quoted in earlier
+  phase notes. `apps/remix` typechecks clean via `react-router typegen &&
+  tsc` and is covered by the build step. Baselines may only be **lowered**;
+  raising one requires a new DECISIONS.md entry. Repo-owned files can never
+  be absorbed into the baseline.
+- **Why:** upstream carries 5/842 Biome diagnostics and 3 drifted files that
+  predate every NorthSign phase. A raw gate would fail every run forever
+  (noise) or force us to "fix" upstream files and pollute the fork-merge
+  surface (D-010). Count-compare keeps pre-existing noise visible (the
+  script prints the numbers every run) while making any *new* diagnostic —
+  ours or upstream's — a hard failure.
+- **Consequence:** the scripts are self-auditing: a delta caused by our own
+  code fails CI with the file list, so the baseline can never be used to
+  hide NorthSign regressions. Verified locally this session: exactly 5
+  errors / 842 warnings with zero diagnostics in repo-owned files, and 5
+  allowlisted / 0 actionable tsc errors.
+
+### D-029: E2E test-state strategy — UI-created state, zero secrets, no seed
+- **Decision:** the Phase 5.5 suite (`packages/app-tests/e2e/northsign/`,
+  dedicated `northsign.playwright.config.ts`) creates **all** of its own
+  state through the real UI: signup (with signature pad + consent checkboxes)
+  → upload of a committed tiny 1-page PDF → recipients → send. The seed
+  script never runs in CI. Emails are consumed through an Inbucket REST
+  client (list mailbox by local-part → fetch body → extract `/sign/{token}`
+  links), and DB-level assertions (consent rows, envelope status, deletion
+  orphaning) query Prisma directly where the UI cannot show the fact. The
+  environment is zero-secret by construction: upload transport = database,
+  SMTP = Inbucket container, signing = the repo's local example cert, jobs =
+  local, OAuth client IDs empty — nothing can reach Stripe, SES, S3, or any
+  OAuth provider. The upstream `packages/app-tests` suite remains untouched
+  and continues to use seeded users.
+- **Why:** the point of Phase 5.5 is to verify what Phases 1–5 actually
+  built, on the exact path a new user takes; seeded demo state would mask
+  signup/consent/first-run behavior and could never test the consent
+  capture added in Phase 5. CI has Docker (the sandbox does not), so this
+  closes the deferred-runtime-QA gap. Zero secrets makes the pipeline safe
+  to run on every push of a public AGPL fork without a credentials
+  checklist.
+- **Consequence:** tests are slower than seed-based ones (real signup flow
+  each time) but exercise the true user path; the four standing gates plus
+  the glossary guard run with `workers: 1` to avoid cross-test DB coupling;
+  the first CI run is expected red and each failure is triaged as a real
+  bug. The Phase 4/5 operator runtime-QA checklists in PHASES.md are now
+  covered by CI except visual text-expansion review (REVIEW-NOTES.md §4.5)
+  and the pre-launch production smoke test, which stay manual.

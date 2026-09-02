@@ -21,6 +21,11 @@ jobs:
         with:
           fetch-depth: 2
 
+      # node-install runs prisma:generate through `with:env` (dotenv), which
+      # expects .env to exist — same pattern as upstream's own workflows.
+      - name: Copy env
+        run: cp .env.example .env
+
       - uses: ./.github/actions/node-install
 
       - name: Biome check (baseline-count gate: 5 errors / 842 warnings)
@@ -39,7 +44,7 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: documenso
-          POSTGRES_PASSWORD: documenso_ci
+          POSTGRES_PASSWORD: password
           POSTGRES_DB: documenso
         ports:
           - 54320:5432
@@ -63,20 +68,21 @@ jobs:
       NEXTAUTH_SECRET: 'e2e-test-secret-not-real'
       NEXT_PRIVATE_ENCRYPTION_KEY: 'CAFEBABE'
       NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY: 'DEADBEEF'
-      NEXT_PRIVATE_DATABASE_URL: 'postgres://documenso:documenso_ci@localhost:54320/documenso'
-      NEXT_PRIVATE_DIRECT_DATABASE_URL: 'postgres://documenso:documenso_ci@localhost:54320/documenso'
+      NEXT_PRIVATE_DATABASE_URL: 'postgres://documenso:password@localhost:54320/documenso'
+      NEXT_PRIVATE_DIRECT_DATABASE_URL: 'postgres://documenso:password@localhost:54320/documenso'
       NEXT_PUBLIC_UPLOAD_TRANSPORT: 'database'
       NEXT_PRIVATE_SIGNING_TRANSPORT: 'local'
-      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: './example/cert.p12'
+      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: './apps/remix/example/cert.p12'
       NEXT_PRIVATE_JOBS_PROVIDER: 'local'
       NEXT_PRIVATE_SMTP_TRANSPORT: 'smtp-auth'
       NEXT_PRIVATE_SMTP_HOST: 'localhost'
       NEXT_PRIVATE_SMTP_PORT: '2500'
       NEXT_PRIVATE_SMTP_USERNAME: 'documenso'
-      NEXT_PRIVATE_SMTP_PASSWORD: 'documenso_ci'
+      NEXT_PRIVATE_SMTP_PASSWORD: 'password'
       NEXT_PRIVATE_SMTP_FROM_NAME: 'NorthSign CI'
       NEXT_PRIVATE_SMTP_FROM_ADDRESS: 'noreply@ci.northsign.test'
       NEXT_PUBLIC_WEBAPP_URL: 'http://localhost:3000'
+      NEXT_PRIVATE_INTERNAL_WEBAPP_URL: 'http://localhost:3000'
       NEXT_PRIVATE_GOOGLE_CLIENT_ID: ''
       NEXT_PRIVATE_GOOGLE_CLIENT_SECRET: ''
       NEXT_PRIVATE_MICROSOFT_CLIENT_ID: ''
@@ -89,13 +95,16 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Copy env
+        run: cp .env.example .env
+
       - uses: ./.github/actions/node-install
 
       - name: Apply database migrations
         run: npm run prisma:migrate-deploy
 
       - name: Build the app (production server)
-        run: npm run build --workspace @documenso/remix
+        run: npm run build -w @documenso/remix
 
       - name: Start the app
         run: |

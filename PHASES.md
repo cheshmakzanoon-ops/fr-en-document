@@ -14,6 +14,7 @@
 | 3 | Canadian hosting & data residency (AWS ca-central-1) | pending operator provisioning |
 | 4 | Bilingual i18n (EN/FR) with Lingui | **complete** |
 | 5 | PIPEDA / Law 25 compliance workstream | **complete** (DRAFT-review gates pending) |
+| 5.5 | CI + automated E2E verification | **complete** (first run expected red — real bugs; baseline gates verified locally) |
 | 6 | Billing & plans (SMB pricing tiers) | pending |
 | 7 | Admin, audit trail & reporting | pending |
 | 8 | Onboarding, templates & integrations | pending |
@@ -352,3 +353,87 @@ behavior — no aspirational claims.
       checked. Export/deletion QA: Settings → Profile export downloads;
       account deletion orphans completed documents (still downloadable via
       signing links) and hard-deletes drafts/templates
+
+> **Phase 5.5 note:** the Phase 4/5 operator runtime-QA checklists above are
+> now **covered by CI** (Phase 5.5) except the explicitly manual items:
+> visual text-expansion review (layout QA on real screens, see
+> REVIEW-NOTES.md §4.5) and the pre-launch production smoke test.
+
+## Phase 5.5 — CI + automated E2E verification (complete)
+
+Five phases of work (rebrand, fr-CA localization, consent/export/deletion,
+recipient locale) had never been runtime-verified — this sandbox has no
+Docker. GitHub Actions can run Docker, so Phase 5.5 converts the deferred
+manual QA checklists into automated tests that run on every push and becomes
+the permanent regression gate for all future phases. Working document:
+`CI.md`. First run is **expected to be red** — every failure is a real bug
+found before billing exists.
+
+1. **Workflow scaffold** — `.github/workflows/ci.yml` replaces the upstream
+   build-only pipeline: push/PR to `dev` and `main`, concurrency group
+   cancels superseded runs. Two jobs:
+   (a) **lint** — `npm ci`, Biome via the baseline-count script, tsc via the
+   known-errors-allowlist script (both below);
+   (b) **e2e** — `postgres:16` service container on 54320 (dev compose port),
+   `inbucket/inbucket` service container (SMTP 2500, REST 9000), `npm ci`,
+   `prisma migrate deploy`, production build of `@documenso/remix`, start the
+   server, poll `GET /api/health` (Phase 3 endpoint) until 200 with timeout +
+   log dump, install Playwright + chromium, run the northsign suite, upload
+   traces/screenshots/videos + app log on failure. **The seed script never
+   runs** — tests create their own state via the UI. Zero secrets by
+   construction: upload transport = database, email = Inbucket, signing =
+   repo's local example cert, jobs = local, OAuth client IDs empty. Nothing
+   outbound.
+2. **Baseline-count gating** — pre-existing upstream diagnostics must not
+   fail every run, and new NorthSign diagnostics must never be hidden:
+   `scripts/ci-biome-baseline.cjs` (fails only beyond 5 errors / 842
+   warnings; on excess, self-audits the offending file list and hard-fails if
+   any repo-owned file regressed) and `scripts/ci-tsc-allowlist.cjs`
+   (per-package tsc; fails on anything outside the 3 known Prisma-drift
+   files). Verified locally this session: exactly 5/842 and 0 actionable tsc
+   errors.
+3. **Test harness** — `packages/app-tests/northsign.playwright.config.ts`
+   (dedicated config: baseURL http://localhost:3000, retries 1, trace
+   retained on retry, 1 worker, upstream suite untouched) +
+   `e2e/northsign/helpers.ts` (UI signup incl. signature pad, document
+   upload from a committed 1-page PDF fixture, recipient add, envelope send,
+   and an Inbucket REST client: list mailbox → fetch body → extract
+   `/sign/{token}` links).
+4. **The four standing gates** (`e2e/northsign/en-flow.spec.ts`,
+   `fr-flow.spec.ts`, `compliance.spec.ts`):
+   EN flow (signup → upload → recipient → send → sign from the Inbucket link
+   → complete → completion email); FR flow (canaries « Téléverser », « Piste
+   d'audit », 24 h dates, French emails + completion page); recipient-locale
+   regression (document en + recipient fr → recipient email French, owner
+   email English — the `getEmailContext` bug from Phase 5 Step 6 must never
+   come back); consent/export/deletion (consent rows via direct DB query,
+   marketing unchecked by default, JSON export downloads, deletion
+   orphans-but-does-not-destroy a co-signed document per D-026).
+5. **Glossary guard** (`e2e/northsign/glossary.spec.ts`) — scans rendered FR
+   pages (landing, signin, dashboard, settings, signing shell) for banned
+   strings (`e-mail`, `email`, « Journal d'audit », standalone `Importer`),
+   with the banned list parsed live from I18N.md §7 so the glossary keeps one
+   source of truth.
+6. **Docs + operator task** — `CI.md`: pipeline reference, local Playwright
+   run against the compose stack, how to add tests, and the exact GitHub
+   branch-protection settings path (Settings → Branches → Branch protection
+   rule for `main` → require status checks `E2E (Playwright, zero secrets)`
+   + `Lint & Typecheck (baseline gates)`) recorded as an operator task.
+
+### Status detail
+
+- [x] ci.yml (lint + e2e jobs, service containers, health poll, artifacts)
+- [x] Baseline-count scripts (biome 5/842; tsc 3-file allowlist), verified
+      locally; baselines may only be lowered (D-028)
+- [x] Playwright config + harness + committed 1-page PDF fixture
+- [x] EN / FR / recipient-locale / consent-export-deletion gates
+- [x] Glossary guard sourced from I18N.md §7
+- [x] CI.md + branch-protection operator task
+- [x] PHASES.md/DECISIONS.md updated; no upstream refactors beyond what
+      CI/E2E required (only the workflow file was replaced)
+- [ ] **Operator: push `dev` to trigger the first CI run** (expected red);
+      triage each failure as a real bug
+- [ ] **Operator: complete the branch-protection task in CI.md §6** after the
+      first successful run registers the check names
+- [ ] **Remains manual (pre-launch):** visual text-expansion review
+      (REVIEW-NOTES.md §4.5) and the production smoke test
