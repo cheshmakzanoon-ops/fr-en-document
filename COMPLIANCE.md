@@ -38,6 +38,7 @@
 | Field values (text, dates, checkboxes, radio, dropdown, numbers) | `Field.customText`, `Field.fieldMeta` | Document content | Can include arbitrary personal info senders ask for |
 | Sign/access auth | `Recipient.authOptions` | e.g. 2FA codes at signing | |
 | Interaction state | `Recipient.readStatus`, `signingStatus`, `signedAt`, `sentAt`, `expiresAt`, `lastReminderSentAt`, `nextReminderAt`, `reminderCount` | Audit + reminders | |
+| Email locale preference | `Recipient.language` | Personalizes signing emails to the signer's language (Phase 5 Step 6, D-027) | Nullable = inherit document language; sender-set via envelope editor; disclosed in /privacy §1.2 |
 | CSC credentials | `CscCredential.certCache`, `serviceTokenCiphertext` | Qualified/eIDAS-style signing (SES) | Encrypted at app layer |
 
 ### 1.3 Where personal information leaves the system

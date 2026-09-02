@@ -682,6 +682,9 @@ model Recipient {
   reminderCount        Int           @default(0)
   authOptions          Json? /// [RecipientAuthOptions] @zod.custom.use(ZRecipientAuthOptionsSchema)
   signingOrder         Int? /// @zod.number.describe("The order in which the recipient should sign the document. Only works if the document is set to sequential signing.")
+
+  /// Per-recipient email/UI locale (D-024). Null = inherit document language.
+  language             String?
   rejectionReason      String?
   role                 RecipientRole @default(SIGNER)
   readStatus           ReadStatus    @default(NOT_OPENED)

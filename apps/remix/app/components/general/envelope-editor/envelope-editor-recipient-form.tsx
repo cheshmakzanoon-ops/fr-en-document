@@ -4,6 +4,7 @@ import { ZEditorRecipientsFormSchema } from '@documenso/lib/client-only/hooks/us
 import { useCurrentEnvelopeEditor } from '@documenso/lib/client-only/providers/envelope-editor-provider';
 import { useCurrentOrganisation } from '@documenso/lib/client-only/providers/organisation';
 import { useOptionalSession } from '@documenso/lib/client-only/providers/session';
+import { SUPPORTED_LANGUAGES } from '@documenso/lib/constants/i18n';
 import type { TDetectedRecipientSchema } from '@documenso/lib/server-only/ai/envelope/detect-recipients/schema';
 import { ZRecipientAuthOptionsSchema } from '@documenso/lib/types/document-auth';
 import { nanoid } from '@documenso/lib/universal/id';
@@ -29,11 +30,13 @@ import { SigningOrderConfirmation } from '@documenso/ui/primitives/document-flow
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@documenso/ui/primitives/form/form';
 import { FormErrorMessage } from '@documenso/ui/primitives/form/form-error-message';
 import { Input } from '@documenso/ui/primitives/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@documenso/ui/primitives/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@documenso/ui/primitives/tooltip';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 import { DragDropContext, Draggable, Droppable, type DropResult, type SensorAPI } from '@hello-pangea/dnd';
 import { plural } from '@lingui/core/macro';
-import { Trans, useLingui } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react';
+import { Trans, useLingui as useLinguiMacro } from '@lingui/react/macro';
 import { DocumentSigningOrder, EnvelopeType, RecipientRole, SendStatus } from '@prisma/client';
 import { motion } from 'framer-motion';
 import { GripVerticalIcon, HelpCircleIcon, PlusIcon, SparklesIcon, TrashIcon } from 'lucide-react';
@@ -53,7 +56,8 @@ export const EnvelopeEditorRecipientForm = () => {
   const organisation = useCurrentOrganisation();
   const team = useCurrentTeam();
 
-  const { t } = useLingui();
+  const { _ } = useLingui();
+  const { t } = useLinguiMacro();
   const { toast } = useToast();
   const { remaining } = useLimits();
   const { sessionData } = useOptionalSession();
@@ -569,6 +573,7 @@ export const EnvelopeEditorRecipientForm = () => {
           signer.name !== recipient.name ||
           signer.role !== recipient.role ||
           signer.signingOrder !== recipient.signingOrder ||
+          (signer.language ?? undefined) !== (recipient.language ?? undefined) ||
           !isDeepEqual(signerActionAuth, recipientActionAuth)
         );
       });
@@ -1012,6 +1017,40 @@ export const EnvelopeEditorRecipientForm = () => {
                                       </FormControl>
 
                                       <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name={`signers.${index}.language`}
+                                  render={({ field }) => (
+                                    <FormItem className="mt-auto w-fit">
+                                      <FormControl>
+                                        <Select
+                                          value={field.value ?? '-1'}
+                                          onValueChange={(value) => field.onChange(value === '-1' ? undefined : value)}
+                                        >
+                                          <SelectTrigger
+                                            className="w-fit bg-background text-muted-foreground"
+                                            data-testid="recipient-language-trigger"
+                                          >
+                                            <SelectValue />
+                                          </SelectTrigger>
+
+                                          <SelectContent>
+                                            {Object.entries(SUPPORTED_LANGUAGES).map(([code, language]) => (
+                                              <SelectItem key={code} value={code}>
+                                                {_(language.full)}
+                                              </SelectItem>
+                                            ))}
+
+                                            <SelectItem value={'-1'}>
+                                              <Trans>Document language</Trans>
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
                                     </FormItem>
                                   )}
                                 />

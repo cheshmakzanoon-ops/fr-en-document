@@ -107,6 +107,7 @@ export const run = async ({ payload, io }: { payload: TSendSigningEmailJobDefini
       teamId: envelope.teamId,
     },
     meta: envelope.documentMeta,
+    recipient,
   });
 
   // Don't send signing invitations if the organisation has email sending disabled or the owner is disabled (e.g. banned).

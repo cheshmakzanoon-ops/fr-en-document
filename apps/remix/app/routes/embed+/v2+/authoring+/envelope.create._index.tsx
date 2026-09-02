@@ -346,6 +346,7 @@ const EnvelopeCreatePage = ({ embedAuthoringOptions }: EnvelopeCreatePageProps) 
       rejectionReason: null,
       expiresAt: null,
       expirationNotifiedAt: null,
+      language: null,
     }));
 
     const type = embedAuthoringOptions.type;

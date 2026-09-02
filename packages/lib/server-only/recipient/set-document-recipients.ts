@@ -166,6 +166,7 @@ export const setDocumentRecipients = async ({
             sendStatus: recipient.role === RecipientRole.CC ? SendStatus.SENT : SendStatus.NOT_SENT,
             signingStatus: recipient.role === RecipientRole.CC ? SigningStatus.SIGNED : SigningStatus.NOT_SIGNED,
             authOptions,
+            language: recipient.language ?? null,
           },
           create: {
             name: recipient.name,
@@ -177,6 +178,7 @@ export const setDocumentRecipients = async ({
             sendStatus: recipient.role === RecipientRole.CC ? SendStatus.SENT : SendStatus.NOT_SENT,
             signingStatus: recipient.role === RecipientRole.CC ? SigningStatus.SIGNED : SigningStatus.NOT_SIGNED,
             authOptions,
+            language: recipient.language ?? null,
           },
         });
 
@@ -326,6 +328,11 @@ type RecipientData = {
   signingOrder?: number | null;
   accessAuth?: TRecipientAccessAuthTypes[];
   actionAuth?: TRecipientActionAuthTypes[];
+  /**
+   * D-027: per-recipient email/UI locale. Null/undefined = inherit document
+   * language. Validated upstream by ZDocumentMetaLanguageSchema.
+   */
+  language?: string | null;
 };
 
 type RecipientDataWithClientId = Recipient & {
@@ -343,6 +350,7 @@ const hasRecipientBeenChanged = (recipient: Recipient, newRecipientData: Recipie
     recipient.name !== newRecipientData.name ||
     recipient.role !== newRecipientData.role ||
     recipient.signingOrder !== newRecipientData.signingOrder ||
+    (recipient.language ?? null) !== (newRecipientData.language ?? null) ||
     !isDeepEqual(authOptions.accessAuth, newRecipientAccessAuth) ||
     !isDeepEqual(authOptions.actionAuth, newRecipientActionAuth)
   );

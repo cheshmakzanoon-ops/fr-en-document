@@ -73,7 +73,14 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
     meta: envelope.documentMeta,
   });
 
-  const i18n = await getI18nInstance(emailLanguage);
+  // D-027: the rejecting recipient gets their confirmation email in their
+  // per-recipient locale when set; the owner notification below intentionally
+  // stays on the document language (it is addressed to the sender, not the
+  // recipient, so passing `recipient` into getEmailContext would mis-localize it).
+  const recipientEmailLanguage = recipient.language || emailLanguage;
+
+  const i18n = await getI18nInstance(recipientEmailLanguage);
+  const ownerI18n = await getI18nInstance(emailLanguage);
 
   // Send confirmation email to the recipient who rejected.
   // Skipped when the organisation has email sending disabled, since this is sent on its behalf.
@@ -89,9 +96,9 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
       });
 
       const [html, text] = await Promise.all([
-        renderEmailWithI18N(recipientTemplate, { lang: emailLanguage, branding }),
+        renderEmailWithI18N(recipientTemplate, { lang: recipientEmailLanguage, branding }),
         renderEmailWithI18N(recipientTemplate, {
-          lang: emailLanguage,
+          lang: recipientEmailLanguage,
           branding,
           plainText: true,
         }),
@@ -136,7 +143,7 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         address: documentOwner.email,
       },
       from: DOCUMENSO_INTERNAL_EMAIL, // Purposefully using internal email here.
-      subject: i18n._(msg`Document "${envelope.title}" - Rejected by ${recipient.name}`),
+      subject: ownerI18n._(msg`Document "${envelope.title}" - Rejected by ${recipient.name}`),
       html,
       text,
     });

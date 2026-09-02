@@ -1,5 +1,7 @@
 import { IS_INSTANCE_CSC_MODE } from '@documenso/lib/constants/app';
+import { isValidLanguageCode } from '@documenso/lib/constants/i18n';
 import { ZRecipientActionAuthTypesSchema, ZRecipientAuthOptionsSchema } from '@documenso/lib/types/document-auth';
+import { ZDocumentMetaLanguageSchema } from '@documenso/lib/types/document-meta';
 import type { TEditorEnvelope } from '@documenso/lib/types/envelope-editor';
 import { ZRecipientEmailSchema } from '@documenso/lib/types/recipient';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,6 +21,8 @@ const LocalRecipientSchema = z.object({
   role: z.nativeEnum(RecipientRole),
   signingOrder: z.number().optional(),
   actionAuth: z.array(ZRecipientActionAuthTypesSchema).optional().default([]),
+  // D-027: per-recipient email/UI locale. Undefined = inherit document language.
+  language: ZDocumentMetaLanguageSchema.optional().catch(undefined),
 });
 
 type TLocalRecipient = z.infer<typeof LocalRecipientSchema>;
@@ -97,6 +101,7 @@ export const useEditorRecipients = ({ envelope }: EditorRecipientsProps): UseEdi
       role: recipient.role,
       signingOrder: isCcRecipient(recipient) ? undefined : (recipient.signingOrder ?? index + 1),
       actionAuth: ZRecipientAuthOptionsSchema.parse(recipient.authOptions)?.actionAuth ?? undefined,
+      language: 'language' in recipient && isValidLanguageCode(recipient.language) ? recipient.language : undefined,
     }));
 
     const signers: TLocalRecipient[] =

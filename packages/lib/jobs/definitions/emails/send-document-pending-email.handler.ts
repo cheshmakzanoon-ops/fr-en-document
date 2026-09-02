@@ -46,6 +46,7 @@ export const run = async ({ payload }: { payload: TSendDocumentPendingEmailJobDe
       teamId: envelope.teamId,
     },
     meta: envelope.documentMeta,
+    recipient: envelope.recipients[0],
   });
 
   // Don't send any emails if the organisation has email sending disabled.

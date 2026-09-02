@@ -1,4 +1,5 @@
 import { ZRecipientActionAuthTypesSchema } from '@documenso/lib/types/document-auth';
+import { ZDocumentMetaLanguageSchema } from '@documenso/lib/types/document-meta';
 import { ZRecipientEmailSchema, ZRecipientLiteSchema } from '@documenso/lib/types/recipient';
 import { EnvelopeType, RecipientRole } from '@prisma/client';
 import { z } from 'zod';
@@ -10,6 +11,8 @@ export const ZSetEnvelopeRecipientSchema = z.object({
   role: z.nativeEnum(RecipientRole),
   signingOrder: z.number().optional(),
   actionAuth: z.array(ZRecipientActionAuthTypesSchema).optional().default([]),
+  // D-027: per-recipient email/UI locale. Null = inherit document language.
+  language: ZDocumentMetaLanguageSchema.nullish(),
 });
 
 export const ZSetEnvelopeRecipientsRequestSchema = z.object({

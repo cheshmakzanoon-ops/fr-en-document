@@ -28,6 +28,11 @@ export interface UpdateEnvelopeRecipientsOptions {
     signingOrder?: number | null;
     accessAuth?: TRecipientAccessAuthTypes[];
     actionAuth?: TRecipientActionAuthTypes[];
+    /**
+     * D-027: per-recipient email/UI locale. Null = inherit document language.
+     * Validated upstream by ZDocumentMetaLanguageSchema.
+     */
+    language?: string | null;
   }[];
   requestMetadata: ApiRequestMetadata;
 }
@@ -153,6 +158,7 @@ export const updateEnvelopeRecipients = async ({
             sendStatus: mergedRecipient.role === RecipientRole.CC ? SendStatus.SENT : SendStatus.NOT_SENT,
             signingStatus: mergedRecipient.role === RecipientRole.CC ? SigningStatus.SIGNED : SigningStatus.NOT_SIGNED,
             authOptions,
+            language: mergedRecipient.language ?? null,
           },
           include: {
             fields: true,

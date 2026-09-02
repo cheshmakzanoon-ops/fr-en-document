@@ -179,6 +179,10 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
 
   await Promise.all(
     recipientsToNotify.map(async (recipient) => {
+      // D-027: recipients with a per-recipient locale get their completion email
+      // in that locale; the owner email above stays on the document language.
+      const recipientEmailLanguage = recipient.language || emailLanguage;
+
       // A CC recipient never asked to be part of this document, so their completion
       // email is effectively unsolicited. Meter it against the organisation email
       // quota/stats so it is correctly logged.
@@ -225,15 +229,15 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
       });
 
       const [html, text] = await Promise.all([
-        renderEmailWithI18N(template, { lang: emailLanguage, branding }),
+        renderEmailWithI18N(template, { lang: recipientEmailLanguage, branding }),
         renderEmailWithI18N(template, {
-          lang: emailLanguage,
+          lang: recipientEmailLanguage,
           branding,
           plainText: true,
         }),
       ]);
 
-      const i18n = await getI18nInstance(emailLanguage);
+      const i18n = await getI18nInstance(recipientEmailLanguage);
 
       await emailTransport.sendMail({
         to: [

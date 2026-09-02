@@ -368,3 +368,33 @@
   personal data no longer appears in the app; DSAR deletion requests are
   fulfilled in this shape and the refusal/limitation is explained per
   PRIVACY-OPS.md §3.
+
+### D-027: Per-recipient email locale lands in Phase 5 Step 6 as Recipient.language (D-024 debt)
+- **Decision:** the Phase 4 deferral (D-024) is resolved by adding a nullable
+  `Recipient.language` column (`TEXT`, migration
+  `20260902120000_recipient_language`; null = inherit document language). The
+  sender picks a locale per signer in the envelope editor (languages list =
+  `SUPPORTED_LANGUAGES`, validated by `ZDocumentMetaLanguageSchema`); the
+  effective email locale chain becomes **`recipient.language` >
+  `document.language` (DocumentMeta.language) > organisation
+  `documentLanguage` > `'en'`** — closer to the original "recipient → owner
+  → en" intent than the D-024 interim chain. Recipients who self-sign
+  (`/sign/{token}`) continue to see the web UI in their own cookie/`?lang=`
+  locale, which takes precedence over any stored value for the rendering
+  page; the stored value only steers emails.
+- **Why:** D-024 explicitly deferred this to Phase 5; a per-recipient locale
+  is required for FR-first documents sent to EN co-signers (common Québec
+  bilingual-agreement pattern) and is disclosed as a personalization
+  preference, not tracking data.
+- **Scope note (owner emails stay on document language):** emails addressed
+  to the document **owner** (completion notice, rejection notice) are
+  rendered in the document language; per-recipient locale applies only to
+  emails addressed to that recipient (invitation, reminder, pending,
+  rejection confirmation, cancellation, completion copy). Passing the
+  recipient into `getEmailContext()` is therefore reserved for handlers
+  whose sole addressee is that recipient.
+- **Consequence:** ten catalogs already cover every UI string the feature
+  emits (the picker reuses existing language names + a "Document language"
+  inherit option); no new msgids. E2E and runtime QA (recipient-locale
+  email received in the chosen language, inherit default unchanged) rides
+  the Phase 5 operator QA pass; fr-CA translations pre-exist from Phase 4.

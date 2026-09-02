@@ -124,6 +124,7 @@ export const ConfigureFieldsView = ({
       readStatus: signer.disabled ? ReadStatus.OPENED : ReadStatus.NOT_OPENED,
       signingStatus: signer.disabled ? SigningStatus.SIGNED : SigningStatus.NOT_SIGNED,
       envelopeId: '',
+      language: null,
     }));
   }, [configData.signers]);
 

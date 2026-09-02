@@ -616,6 +616,7 @@ const mapLocalRecipientsToRecipients = ({
       sendStatus: foundRecipient?.sendStatus || SendStatus.NOT_SENT,
       expiresAt: foundRecipient?.expiresAt || null,
       expirationNotifiedAt: foundRecipient?.expirationNotifiedAt || null,
+      language: foundRecipient?.language ?? null,
     };
   });
 };

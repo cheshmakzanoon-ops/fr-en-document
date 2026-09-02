@@ -86,8 +86,6 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
     return;
   }
 
-  const i18n = await getI18nInstance(emailLanguage);
-
   // Send cancellation emails to recipients who have been sent the document or viewed it.
   // CC recipients are excluded because they were never actually emailed about the document
   // (CC recipients are created with sendStatus=SENT by default but never receive a signing
@@ -103,6 +101,12 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
   await io.runTask('send-cancellation-emails', async () => {
     await Promise.all(
       recipientsToNotify.map(async (recipient) => {
+        // D-027: recipients with a per-recipient locale get their cancellation
+        // email in that locale; otherwise the document language is used.
+        const recipientEmailLanguage = recipient.language || emailLanguage;
+
+        const i18n = await getI18nInstance(recipientEmailLanguage);
+
         // Meter the cancellation email against the organisation email quota/stats.
         // The recipient never opted in, so this notification is unsolicited and
         // must be bounded by the same org limits as other outbound emails.
@@ -134,9 +138,9 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
         });
 
         const [html, text] = await Promise.all([
-          renderEmailWithI18N(template, { lang: emailLanguage, branding }),
+          renderEmailWithI18N(template, { lang: recipientEmailLanguage, branding }),
           renderEmailWithI18N(template, {
-            lang: emailLanguage,
+            lang: recipientEmailLanguage,
             branding,
             plainText: true,
           }),

@@ -119,6 +119,7 @@ export const run = async ({ payload, io }: { payload: TProcessSigningReminderJob
       teamId: envelope.teamId,
     },
     meta: envelope.documentMeta,
+    recipient,
   });
 
   // Don't send reminders if the owner is disabled (e.g. banned) or the organisation

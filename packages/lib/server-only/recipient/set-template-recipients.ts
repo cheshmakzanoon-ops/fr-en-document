@@ -145,6 +145,7 @@ export const setTemplateRecipients = async ({ userId, teamId, id, recipients }: 
             signingOrder: recipient.signingOrder,
             envelopeId: envelope.id,
             authOptions,
+            language: recipient.language ?? null,
           },
           create: {
             name: recipient.name,
@@ -154,6 +155,7 @@ export const setTemplateRecipients = async ({ userId, teamId, id, recipients }: 
             token: nanoid(),
             envelopeId: envelope.id,
             authOptions,
+            language: recipient.language ?? null,
           },
         });
 
@@ -215,6 +217,11 @@ type RecipientData = {
   role: RecipientRole;
   signingOrder?: number | null;
   actionAuth?: TRecipientActionAuthTypes[];
+  /**
+   * D-027: per-recipient email/UI locale. Null/undefined = inherit document
+   * language. Validated upstream by ZDocumentMetaLanguageSchema.
+   */
+  language?: string | null;
 };
 
 type RecipientDataWithClientId = Recipient & {

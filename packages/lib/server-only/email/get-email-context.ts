@@ -7,6 +7,7 @@ import type {
   Organisation,
   OrganisationEmail,
   OrganisationType,
+  Recipient,
 } from '@documenso/prisma/client';
 import { EmailDomainStatus, type OrganisationClaim, type OrganisationGlobalSettings } from '@documenso/prisma/client';
 import type { Transporter } from 'nodemailer';
@@ -58,6 +59,13 @@ type RecipientGetEmailContextOptions = BaseGetEmailContextOptions & {
   emailType: 'RECIPIENT';
 
   /**
+   * The recipient the email is for. When provided, `recipient.language`
+   * wins over document language (D-027 locale chain:
+   * recipient.language > document.language > organisation documentLanguage > 'en').
+   */
+  recipient?: Pick<Recipient, 'language'> | null | undefined;
+
+  /**
    * Force meta options as a typesafe way to ensure developers don't forget to
    * pass it in if it is available.
    */
@@ -99,7 +107,11 @@ export const getEmailContext = async (options: GetEmailContextOptions): Promise<
     emailContext = await handleTeamEmailContext(source.teamId);
   }
 
-  const emailLanguage = meta?.language || emailContext.settings.documentLanguage;
+  // D-027 locale chain: recipient.language > document.language > organisation
+  // documentLanguage > 'en' (source fallback in render layer).
+  const recipientLanguage = options.emailType === 'RECIPIENT' ? (options.recipient?.language ?? undefined) : undefined;
+
+  const emailLanguage = recipientLanguage || meta?.language || emailContext.settings.documentLanguage;
 
   const transportResolution = emailContext.claims.emailTransportId
     ? await resolveEmailTransport(emailContext.claims.emailTransportId)
