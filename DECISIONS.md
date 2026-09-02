@@ -344,3 +344,27 @@
   localized reason regardless of who opens them (it is stamped at seal
   time); date rendering follows locale in `i18n.date`-driven views and the
   user's format in document views; Phase 6 wires `i18n.number` with CAD.
+
+### D-026: Account deletion orphans, does not destroy, documents others rely on
+- **Decision:** the existing orphaning semantics in
+  `packages/lib/server-only/user/delete-user.ts` + `orphan-envelopes.ts` are
+  ratified as the NorthSign deletion policy (no code change to the core
+  behavior): on account deletion, envelopes owned by the user in their own
+  organisations are transferred to the **deleted-account service account**
+  and flagged `deletedAt` (hidden from lists, retained verifiable); drafts
+  and templates are hard-deleted; envelopes in teams owned by others are
+  transferred to that team's organisation owner. The delete-account dialog
+  and /terms §9 copy now describe exactly this behavior (previously the
+  dialog claimed "all documents deleted", which was false). Deletion
+  requests are processed via the DSAR runbook in `PRIVACY-OPS.md`.
+- **Why:** signed documents are legal records co-signers rely on; destroying
+  them would breach the expectations of third parties who never consented to
+  the account holder's deletion, and PIPEDA/Law 25 retention-for-legal-use
+  exceptions permit keeping evidence. Deleting users' *identity artifacts*
+  (sessions, tokens, security logs cascade) still satisfies erasure of the
+  account itself.
+- **Consequence:** completed/pending documents outlive accounts and remain
+  downloadable by recipients via their signing links; the deleted user's
+  personal data no longer appears in the app; DSAR deletion requests are
+  fulfilled in this shape and the refusal/limitation is explained per
+  PRIVACY-OPS.md §3.

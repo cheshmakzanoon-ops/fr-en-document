@@ -68,8 +68,9 @@ export const AccountDeleteDialog = ({ className }: AccountDeleteDialogProps) => 
           </AlertTitle>
           <AlertDescription className="mr-2">
             <Trans>
-              Delete your account and all its contents, including completed documents. This action is irreversible and
-              will cancel your subscription, so proceed with caution.
+              Delete your account. Documents you own that other parties rely on are kept as legal records (moved to a
+              restricted service account); drafts and templates are removed. This action is irreversible and will cancel
+              your subscription, so proceed with caution.
             </Trans>
           </AlertDescription>
         </div>
@@ -104,8 +105,12 @@ export const AccountDeleteDialog = ({ className }: AccountDeleteDialogProps) => 
 
                 <DialogDescription>
                   <Trans>
-                    {APP_NAME} will delete <span className="font-semibold">all of your documents</span>, along with all
-                    of your completed documents, signatures, and all other resources belonging to your Account.
+                    {APP_NAME} will permanently delete your{' '}
+                    <span className="font-semibold">draft documents and templates</span>, along with your sessions, API
+                    tokens, and other account resources. Documents you sent for signature — including completed ones —
+                    are <span className="font-semibold">not destroyed</span>: they are transferred to a restricted
+                    service account and retained as legal records that co-signers may rely on. Consider downloading your
+                    data export first.
                   </Trans>
                 </DialogDescription>
               </DialogHeader>
