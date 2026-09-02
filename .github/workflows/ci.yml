@@ -1,21 +1,20 @@
 name: 'Continuous Integration'
 
 on:
-  workflow_call:
   push:
-    branches: ['main']
+    branches: ['dev', 'main']
   pull_request:
-    branches: ['main']
+    branches: ['dev', 'main']
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build_app:
-    name: Build App
+  lint:
+    name: 'Lint & Typecheck (baseline gates)'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,29 +23,114 @@ jobs:
 
       - uses: ./.github/actions/node-install
 
-      - name: Copy env
-        run: cp .env.example .env
+      - name: Biome check (baseline-count gate: 5 errors / 842 warnings)
+        run: node scripts/ci-biome-baseline.cjs
 
-      - name: Build app
-        run: npm run build
+      - name: TypeScript (known-errors allowlist: 3 Prisma-drift files)
+        run: node scripts/ci-tsc-allowlist.cjs
 
-  build_docker:
-    name: Build Docker Image
+  e2e:
+    name: 'E2E (Playwright, zero secrets)'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: documenso
+          POSTGRES_PASSWORD: documenso_ci
+          POSTGRES_DB: documenso
+        ports:
+          - 54320:5432
+        options: >-
+          --health-cmd "pg_isready -U documenso -d documenso"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      inbucket:
+        image: inbucket/inbucket
+        ports:
+          - 9000:9000
+          - 2500:2500
+
+    env:
+      # Dev-style env with ZERO real secrets. Upload transport = database,
+      # email = Inbucket mail-catcher container, local-file signing cert from
+      # the repo's example assets, local jobs. Nothing outbound is possible:
+      # no Stripe, no OAuth, no SES, no S3.
+      NEXTAUTH_SECRET: 'e2e-test-secret-not-real'
+      NEXT_PRIVATE_ENCRYPTION_KEY: 'CAFEBABE'
+      NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY: 'DEADBEEF'
+      NEXT_PRIVATE_DATABASE_URL: 'postgres://documenso:documenso_ci@localhost:54320/documenso'
+      NEXT_PRIVATE_DIRECT_DATABASE_URL: 'postgres://documenso:documenso_ci@localhost:54320/documenso'
+      NEXT_PUBLIC_UPLOAD_TRANSPORT: 'database'
+      NEXT_PRIVATE_SIGNING_TRANSPORT: 'local'
+      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: './example/cert.p12'
+      NEXT_PRIVATE_JOBS_PROVIDER: 'local'
+      NEXT_PRIVATE_SMTP_TRANSPORT: 'smtp-auth'
+      NEXT_PRIVATE_SMTP_HOST: 'localhost'
+      NEXT_PRIVATE_SMTP_PORT: '2500'
+      NEXT_PRIVATE_SMTP_USERNAME: 'documenso'
+      NEXT_PRIVATE_SMTP_PASSWORD: 'documenso_ci'
+      NEXT_PRIVATE_SMTP_FROM_NAME: 'NorthSign CI'
+      NEXT_PRIVATE_SMTP_FROM_ADDRESS: 'noreply@ci.northsign.test'
+      NEXT_PUBLIC_WEBAPP_URL: 'http://localhost:3000'
+      NEXT_PRIVATE_GOOGLE_CLIENT_ID: ''
+      NEXT_PRIVATE_GOOGLE_CLIENT_SECRET: ''
+      NEXT_PRIVATE_MICROSOFT_CLIENT_ID: ''
+      NEXT_PRIVATE_MICROSOFT_CLIENT_SECRET: ''
+      DANGEROUS_BYPASS_RATE_LIMITS: 'true'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: ./.github/actions/node-install
 
-      - name: Build Docker Image
-        uses: docker/build-push-action@v5
+      - name: Apply database migrations
+        run: npm run prisma:migrate-deploy
+
+      - name: Build the app (production server)
+        run: npm run build --workspace @documenso/remix
+
+      - name: Start the app
+        run: |
+          PORT=3000 node apps/remix/build/server/main.js > /tmp/app.log 2>&1 &
+          echo $! > /tmp/app.pid
+
+      - name: Poll /api/health until ready
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /tmp/health.json -w '%{http_code}' http://localhost:3000/api/health || true)
+            if [ "$code" = "200" ]; then
+              echo "App ready after ${i} attempt(s): $(cat /tmp/health.json)"
+              exit 0
+            fi
+            echo "Attempt ${i}/60: HTTP ${code} — retrying in 5s"
+            sleep 5
+          done
+          echo 'App failed to become healthy within 5 minutes. Last log lines:'
+          tail -n 100 /tmp/app.log || true
+          exit 1
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run NorthSign E2E tests
+        run: npx playwright test --config packages/app-tests/northsign.playwright.config.ts
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          push: false
-          context: .
-          file: ./docker/Dockerfile
-          tags: documenso-${{ github.sha }}
+          name: e2e-artifacts-${{ github.run_id }}
+          path: |
+            packages/app-tests/test-results/**
+            packages/app-tests/playwright-report/**
+            /tmp/app.log
+          retention-days: 7
