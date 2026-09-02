@@ -28,6 +28,7 @@ import { createUser } from '@documenso/lib/server-only/user/create-user';
 import { forgotPassword } from '@documenso/lib/server-only/user/forgot-password';
 import { getMostRecentEmailVerificationToken } from '@documenso/lib/server-only/user/get-most-recent-email-verification-token';
 import { getUserByResetToken } from '@documenso/lib/server-only/user/get-user-by-reset-token';
+import { recordUserConsent } from '@documenso/lib/server-only/user/record-user-consent';
 import { resetPassword } from '@documenso/lib/server-only/user/reset-password';
 import { deletedServiceAccountEmail } from '@documenso/lib/server-only/user/service-accounts/deleted-account';
 import { legacyServiceAccountEmail } from '@documenso/lib/server-only/user/service-accounts/legacy-service-account';
@@ -197,7 +198,16 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
       });
     }
 
-    const { name, email, password, signature, captchaToken } = c.req.valid('json');
+    const { name, email, password, signature, captchaToken, acceptTerms, marketingOptIn } = c.req.valid('json');
+
+    // PIPEDA cl. 4.3 / Law 25 s. 8.1: the account cannot be created without
+    // an explicit acceptance flag. The accepted versions are recorded
+    // server-side from the brand constants, not trusted from the client.
+    if (!acceptTerms) {
+      throw new AppError(AuthenticationErrorCode.SignupDisabled, {
+        statusCode: 400,
+      });
+    }
 
     const signupLimitResult = await signupRateLimit.check({
       ip: requestMetadata.ipAddress ?? 'unknown',
@@ -234,6 +244,30 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
       console.error(err);
       throw err;
     });
+
+    // Consent capture: versioned ToS/Privacy acceptance + optional CASL
+    // marketing opt-in, both with timestamp and request metadata. Marketing
+    // consent is stored only when explicitly given (unchecked by default in
+    // the UI — no pre-ticked boxes).
+    await recordUserConsent({
+      userId: user.id,
+      type: 'TERMS_AND_PRIVACY',
+      source: 'signup',
+      requestMetadata,
+    }).catch((err) => {
+      console.error('Failed to record ToS/Privacy consent', err);
+    });
+
+    if (marketingOptIn) {
+      await recordUserConsent({
+        userId: user.id,
+        type: 'MARKETING_EMAIL',
+        source: 'signup-marketing-optin',
+        requestMetadata,
+      }).catch((err) => {
+        console.error('Failed to record marketing consent', err);
+      });
+    }
 
     await jobsClient.triggerJob({
       name: 'send.signup.confirmation.email',

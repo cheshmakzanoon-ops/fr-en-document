@@ -8,6 +8,7 @@ import { zEmail } from '@documenso/lib/utils/zod';
 import { ZPasswordSchema } from '@documenso/trpc/server/auth-router/schema';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
+import { Checkbox } from '@documenso/ui/primitives/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@documenso/ui/primitives/form/form';
 import { Input } from '@documenso/ui/primitives/input';
 import { PasswordInput } from '@documenso/ui/primitives/password-input';
@@ -35,6 +36,20 @@ export const ZSignUpFormSchema = z
     email: zEmail().min(1),
     password: ZPasswordSchema,
     signature: z.string().min(1, { message: msg`We need your signature to sign documents`.id }),
+    /**
+     * Required express acceptance of the Terms of Service and Privacy Policy
+     * (PIPEDA cl. 4.3 / Law 25 s. 8.1). Versioned, timestamped server-side.
+     * The server re-enforces this as `z.literal(true)` — the client-side
+     * refine exists for form UX.
+     */
+    acceptTerms: z.boolean().refine((value) => value === true, {
+      message: msg`You must accept the Terms of Service and Privacy Policy to create an account`.id,
+    }),
+    /**
+     * CASL express marketing-email consent. UNCHECKED by default — no
+     * pre-ticked boxes. Stored with source + timestamp when given.
+     */
+    marketingOptIn: z.boolean().default(false),
   })
   .refine(
     (data) => {
@@ -95,6 +110,8 @@ export const SignUpForm = ({
       email: initialEmail ?? '',
       password: '',
       signature: '',
+      acceptTerms: false,
+      marketingOptIn: false,
     },
     mode: 'onChange',
     resolver: zodResolver(ZSignUpFormSchema),
@@ -102,7 +119,7 @@ export const SignUpForm = ({
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onFormSubmit = async ({ name, email, password, signature }: TSignUpFormSchema) => {
+  const onFormSubmit = async ({ name, email, password, signature, marketingOptIn }: TSignUpFormSchema) => {
     try {
       let token: string | undefined;
 
@@ -126,6 +143,10 @@ export const SignUpForm = ({
         password,
         signature,
         captchaToken: token ?? undefined,
+        // The literal-true flag is validated by the schema; the marketing
+        // opt-in flows through to the server consent record (CASL).
+        acceptTerms: true,
+        marketingOptIn,
       });
 
       await navigate(returnTo ? returnTo : '/unverified-account');
@@ -319,6 +340,67 @@ export const SignUpForm = ({
                           />
                         </FormControl>
 
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="acceptTerms"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex flex-row items-start gap-x-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value === true}
+                              onCheckedChange={(checked) => field.onChange(checked === true)}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal leading-snug">
+                            <Trans>
+                              I have read and accept the{' '}
+                              <Link
+                                to="/terms"
+                                className="text-documenso-700 underline underline-offset-2 hover:opacity-70"
+                              >
+                                Terms of Service
+                              </Link>{' '}
+                              and the{' '}
+                              <Link
+                                to="/privacy"
+                                className="text-documenso-700 underline underline-offset-2 hover:opacity-70"
+                              >
+                                Privacy Policy
+                              </Link>
+                              , including how my data is stored in Canada.
+                            </Trans>
+                          </FormLabel>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="marketingOptIn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex flex-row items-start gap-x-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value === true}
+                              onCheckedChange={(checked) => field.onChange(checked === true)}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal leading-snug">
+                            <Trans>
+                              Send me occasional product news and offers by email. Optional — you can unsubscribe at any
+                              time.
+                            </Trans>
+                          </FormLabel>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

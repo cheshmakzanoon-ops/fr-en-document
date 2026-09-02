@@ -38,6 +38,16 @@ export const ZSignUpSchema = z.object({
   password: ZPasswordSchema,
   signature: z.string().nullish(),
   captchaToken: z.string().trim().optional(),
+  /**
+   * Express acceptance of the Terms of Service + Privacy Policy at signup.
+   * The server records the accepted version server-side; the boolean simply
+   * gates account creation. CASL marketing opt-in is a separate field.
+   */
+  acceptTerms: z.literal(true, {
+    message: 'You must accept the Terms of Service and Privacy Policy to create an account',
+  }),
+  /** CASL express marketing-email consent — UNCHECKED by default in the UI. */
+  marketingOptIn: z.boolean().optional().default(false),
 });
 
 export type TSignUpSchema = z.infer<typeof ZSignUpSchema>;

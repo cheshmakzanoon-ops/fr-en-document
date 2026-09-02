@@ -89,6 +89,11 @@ export const ClaimAccount = ({ defaultName, defaultEmail }: ClaimAccountProps) =
         email,
         password,
         captchaToken: token ?? undefined,
+        // Admin-initiated account-claim flow: there is no signup form, so no
+        // checkbox is shown. Flagged as a lawyer-review item in REVIEW-NOTES.md
+        // (Phase 5) — the server records the ToS/Privacy version regardless.
+        acceptTerms: true,
+        marketingOptIn: false,
       });
 
       await navigate(`/unverified-account`);

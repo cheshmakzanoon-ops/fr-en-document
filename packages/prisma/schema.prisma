@@ -72,6 +72,7 @@ model User {
   webhooks           Webhook[]
   siteSettings       SiteSettings[]
   passkeys           Passkey[]
+  consentRecords     UserConsentRecord[]
   avatarImage        AvatarImage?           @relation(fields: [avatarImageId], references: [id], onDelete: SetNull)
 
   @@index([email])
@@ -142,6 +143,41 @@ model Passkey {
   transports           String[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ConsentRecordType {
+  /// Acceptance of the Terms of Service + Privacy Policy at a specific version.
+  TERMS_AND_PRIVACY
+  /// CASL express consent to receive marketing email. Transactional and
+  /// signing emails are never consent-gated (legitimate operational need).
+  MARKETING_EMAIL
+}
+
+/// Immutable record of a consent event (PIPEDA cl. 4.3 / Law 25 s. 8.1):
+/// what was accepted, which version, when, from where. Rows are never
+/// updated — a new acceptance or withdrawal appends a new row.
+model UserConsentRecord {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type            ConsentRecordType
+
+  /// For TERMS_AND_PRIVACY: the TERMS_VERSION / PRIVACY_VERSION accepted
+  /// (see `packages/lib/constants/brand.ts`). For MARKETING_EMAIL: '1'.
+  documentVersion String
+
+  /// Machine-readable capture source, e.g. 'signup' or 'signup-marketing-optin'.
+  source          String
+
+  acceptedAt DateTime @default(now())
+
+  /// Request metadata captured at consent time.
+  ipAddress  String?
+  userAgent  String?
+
+  @@index([userId])
+  @@index([type, acceptedAt])
 }
 
 model AnonymousVerificationToken {
