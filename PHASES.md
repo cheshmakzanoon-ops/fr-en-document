@@ -13,7 +13,7 @@
 | 2 | Rebranding (name, logo, colors, app copy) | **complete** |
 | 3 | Canadian hosting & data residency (AWS ca-central-1) | pending operator provisioning |
 | 4 | Bilingual i18n (EN/FR) with Lingui | **complete** |
-| 5 | PIPEDA / Law 25 compliance workstream | pending |
+| 5 | PIPEDA / Law 25 compliance workstream | **complete** (DRAFT-review gates pending) |
 | 6 | Billing & plans (SMB pricing tiers) | pending |
 | 7 | Admin, audit trail & reporting | pending |
 | 8 | Onboarding, templates & integrations | pending |
@@ -269,3 +269,86 @@ provisioned AWS/DNS and passed the first-deploy smoke test.
 > **Phase 4 note:** Phase 3 (hosting) remains at "pending operator
 > provisioning" — unrelated to Phase 4 completion; both land on the same
 > operator run.
+
+## Phase 5 — PIPEDA / Law 25 compliance workstream (complete)
+
+Every legal-content artifact below carries a visible **"DRAFT — requires
+review by a Canadian lawyer before public launch"** banner; that banner is a
+**launch gate** recorded here (and in the Phase 10 gate list), not
+decoration. Content was grounded in the Step 1 inventory of actual product
+behavior — no aspirational claims.
+
+1. **Compliance inventory** — `COMPLIANCE.md`: what personal information the
+   app collects and where it lives (tables/fields), where it leaves the
+   system (email, webhooks, PDFs, logs), existing audit-log tables, consent
+   capture state, the account-deletion path (pre-Step-4 reality), cookie
+   usage, and the processor list — each mapped against PIPEDA fair-information
+   principles and Quebec Law 25, with a gap list that drove Steps 2–5
+   (commit `0912b77`).
+2. **Legal pages finalized** — `/terms` and `/privacy` with real content in
+   EN + fr-CA: privacy-officer contact (`privacy@northsign.ca`), what we
+   collect and why, the exact DEPLOYMENT.md residency claim wording,
+   processors/sub-processors, retention (cross-referencing `RETENTION.md`),
+   individual rights (access, rectification, portability, de-indexing), the
+   incident-register commitment, and how to make a request. Draft banners
+   visible on both pages; `TERMS_VERSION` / `PRIVACY_VERSION` constants live
+   in `packages/lib/constants/brand.ts` (commit `fc12574`).
+3. **Consent capture** — signup records ToS/Privacy acceptance with
+   timestamp + version in a new `UserConsentRecord` table (append-only),
+   plus a separate marketing opt-in checkbox **unchecked by default** (CASL
+   express consent, source + timestamp stored). Transactional/signing emails
+   are documented as legitimate-operational-need, not consent-gated
+   (commit `8a4d760`).
+4. **Data subject rights** — deletion-path wiring ratified as-is (D-026:
+   orphaning, not destruction — pending/completed documents transfer to the
+   deleted-account service account; drafts/templates hard-delete; the delete
+   dialog now says exactly that, EN + fr). In-app **data export** (JSON:
+   profile, consents, security log, owned-document metadata + recipients)
+   at Settings → Profile. `PRIVACY-OPS.md` DSAR runbook: intake,
+   identity verification, 30-day clock, request-log template
+   (commit `8f293b0`).
+5. **Retention & incident readiness** — `RETENTION.md` (documents + audit
+   logs retained as legal records; security logs 12 mo; webhook calls,
+   rate-limit counters, background jobs 90 d; consent records 3 y
+   post-deletion; backups 14 daily/4 weekly) and `INCIDENT-RESPONSE.md`
+   (definitions, roles, CAI/Law 25 + OPC/PIPEDA notification thresholds and
+   clocks, breach-register template, annual tabletop) — both DRAFT-gated
+   (commit `0dfefbe`).
+6. **Per-recipient email locale (D-024 debt)** — `Recipient.language`
+   (nullable = inherit) + envelope-editor picker; locale chain
+   recipient.language > document.language > org documentLanguage > en;
+   owner-facing emails stay on document language (D-027)
+   (commits `15b7bcc` [catalog backfill], `a35b095`).
+
+### Status detail
+
+- [x] COMPLIANCE.md inventory + gap list (grounded in code as of `870d2e0`)
+- [x] /terms + /privacy EN + fr-CA with DRAFT banners; version constants in
+      `brand.ts`; page content grounded in Step 1
+- [x] Consent capture migration + signup wiring (ToS/Privacy version +
+      timestamp; CASL marketing opt-in unchecked by default); the
+      transactional-vs-marketing distinction documented in /privacy §2
+- [x] Deletion behavior defined + disclosed (D-026), delete dialog copy
+      corrected in both languages; in-app data export shipped (PIPEDA access
+      + Law 25 portability); PRIVACY-OPS.md DSAR runbook
+- [x] RETENTION.md + INCIDENT-RESPONSE.md (DRAFT launch gates)
+- [x] Per-recipient email locale shipped (D-027); D-024 resolved; I18N.md
+      §5 and COMPLIANCE.md §1.2 updated; /privacy §2 discloses the
+      email-language preference (EN + fr)
+- [x] Biome baseline unchanged (5 errors / 842 warnings); `tsc --noEmit`
+      clean on every touched package/file (packages/lib, packages/trpc,
+      apps/remix — remaining lib errors are the three pre-existing
+      Prisma-drift files); catalogs verified NUL-free
+- [ ] **Lawyer review of every DRAFT legal artifact before public launch**
+      (COMPLIANCE.md, /terms, /privacy, RETENTION.md, PRIVACY-OPS.md,
+      INCIDENT-RESPONSE.md) — Phase 10 launch gate
+- [ ] **Operator machine (runtime QA additions for Step 6):** with Docker/
+      Postgres: set a signer's language to Français on an otherwise-EN
+      document → invite/reminder/completion emails arrive in French while
+      the owner's copy stays in English (rejection and completion notices);
+      clearing the picker restores document-language behavior; default
+      (unset) recipients see zero behavior change. Consent QA: new signup
+      records ToS/Privacy version + timestamp and marketing opt-in only when
+      checked. Export/deletion QA: Settings → Profile export downloads;
+      account deletion orphans completed documents (still downloadable via
+      signing links) and hard-deletes drafts/templates
