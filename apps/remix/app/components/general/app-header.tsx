@@ -1,5 +1,6 @@
 import { getRootHref } from '@documenso/lib/utils/params';
 import { trpc } from '@documenso/trpc/react';
+import { LanguageSwitcher } from '@documenso/ui/components/common/language-switcher';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { ReadStatus } from '@prisma/client';
@@ -81,6 +82,8 @@ export const Header = ({ className, fullWidth = false, ...props }: HeaderProps) 
             )}
           </Link>
         </Button>
+
+        <LanguageSwitcher className="hidden md:flex" />
 
         <div className="md:ml-4">
           <OrgMenuSwitcher />

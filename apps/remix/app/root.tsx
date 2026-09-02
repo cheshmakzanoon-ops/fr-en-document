@@ -2,9 +2,7 @@ import { getOptionalSession } from '@documenso/auth/server/lib/utils/get-session
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
 import { SessionProvider } from '@documenso/lib/client-only/providers/session';
 import { getBasePath } from '@documenso/lib/constants/app';
-import { APP_I18N_OPTIONS, type SupportedLanguageCodes } from '@documenso/lib/constants/i18n';
 import { createPublicEnv } from '@documenso/lib/utils/env';
-import { extractLocaleData } from '@documenso/lib/utils/i18n';
 import { TrpcProvider } from '@documenso/trpc/react';
 import { getOrganisationSession } from '@documenso/trpc/server/organisation-router/get-organisation-session';
 import { Toaster } from '@documenso/ui/primitives/toaster';
@@ -26,7 +24,7 @@ import { PreventFlashOnWrongTheme, ThemeProvider, useTheme } from 'remix-themes'
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
 import { GenericErrorLayout } from './components/general/generic-error-layout';
-import { langCookie } from './storage/lang-cookie.server';
+import { getLocaleFromRequest, langCookie } from './storage/lang-cookie.server';
 import { themeSessionResolver } from './storage/theme-session.server';
 import { appMetaTags } from './utils/meta';
 import { nonce } from './utils/nonce';
@@ -51,11 +49,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
   const cookieHeader = request.headers.get('cookie') ?? '';
 
-  let lang: SupportedLanguageCodes = await langCookie.parse(cookieHeader);
-
-  if (!APP_I18N_OPTIONS.supportedLangs.includes(lang)) {
-    lang = extractLocaleData({ headers: request.headers }).lang;
-  }
+  const lang = await getLocaleFromRequest(request);
 
   const disableAnimations = cookieHeader.includes('__disable_animations=true');
 
@@ -136,6 +130,13 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         <link rel="icon" type="image/png" sizes="16x16" href={`${basePath}/favicon-16x16.png`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href={`${basePath}/site.webmanifest`} />
+        {/*
+          hreflang alternates (D-022). Locale is cookie-driven; `?lang=` is the
+          explicit override so search engines can crawl both variants.
+        */}
+        <link rel="alternate" hrefLang="en-CA" href={`${basePath}/?lang=en`} />
+        <link rel="alternate" hrefLang="fr-CA" href={`${basePath}/?lang=fr`} />
+        <link rel="alternate" hrefLang="x-default" href={`${basePath}/`} />
         <meta name="google" content="notranslate" />
         <Meta />
         <Links nonce={nonce(cspNonce)} />
