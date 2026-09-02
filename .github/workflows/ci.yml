@@ -72,7 +72,10 @@ jobs:
       NEXT_PRIVATE_DIRECT_DATABASE_URL: 'postgres://documenso:password@localhost:54320/documenso'
       NEXT_PUBLIC_UPLOAD_TRANSPORT: 'database'
       NEXT_PRIVATE_SIGNING_TRANSPORT: 'local'
-      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: './apps/remix/example/cert.p12'
+      # Read with fs.readFileSync relative to process.cwd() — the app runs with
+      # cwd = apps/remix (see the start step), same as upstream Docker's
+      # WORKDIR /app/apps/remix. So this is apps/remix/example/cert.p12.
+      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: './example/cert.p12'
       NEXT_PRIVATE_JOBS_PROVIDER: 'local'
       NEXT_PRIVATE_SMTP_TRANSPORT: 'smtp-auth'
       NEXT_PRIVATE_SMTP_HOST: 'localhost'
@@ -106,9 +109,17 @@ jobs:
       - name: Build the app (production server)
         run: npm run build -w @documenso/remix
 
-      - name: Start the app
+      - name: Start the app (cwd apps/remix, like upstream Docker)
         run: |
-          PORT=3000 node apps/remix/build/server/main.js > /tmp/app.log 2>&1 &
+          cd apps/remix
+          # Static assets (serveStatic root 'build/client'), the local signing
+          # certificate, and the PDF-certificate logo all resolve relative to
+          # process.cwd() — which must be apps/remix. Upstream's Dockerfile does
+          # `WORKDIR /app/apps/remix` before `node build/server/main.js`; the
+          # workspace start script runs with the same cwd. Running it from the
+          # repo root silently breaks all client JS (assets 404 into the SSR
+          # router → no hydration → dialogs/locale switching dead).
+          PORT=3000 NODE_ENV=production node build/server/main.js > /tmp/app.log 2>&1 &
           echo $! > /tmp/app.pid
 
       - name: Poll /api/health until ready
@@ -126,6 +137,24 @@ jobs:
           echo 'App failed to become healthy within 5 minutes. Last log lines:'
           tail -n 100 /tmp/app.log || true
           exit 1
+
+      - name: Guard - client JS assets must be served as static files
+        run: |
+          set -e
+          entry=$(find apps/remix/build/client/assets -name 'index-*.js' | head -n 1)
+          if [ -z "$entry" ]; then
+            echo 'No built client entry asset found under apps/remix/build/client/assets'
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000/assets/$(basename "$entry")")
+          if [ "$code" != "200" ]; then
+            echo "Client asset /assets/$(basename "$entry") returned HTTP $code."
+            echo 'Static assets are being handled by the SSR router instead of serveStatic —'
+            echo 'the server was almost certainly started from the wrong working directory.'
+            tail -n 100 /tmp/app.log || true
+            exit 1
+          fi
+          echo "Client asset served correctly: HTTP $code"
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
