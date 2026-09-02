@@ -272,3 +272,75 @@
   decision (hardening) — and when they land, they must satisfy D-017.
 - **Consequence:** one new route in the Hono router; nothing else changed
   in the app. No new dependencies.
+
+---
+
+## 2026-09-01 — Phase 4: Bilingual EN/FR localization
+
+### D-022: Cookie-based locale strategy, not /fr/* subdirectories
+- **Decision:** keep upstream's cookie-based locale switching (`lang` cookie >
+  `Accept-Language` > `en`) as the product's strategy; do NOT introduce
+  `/fr/*` subdirectory routing. Added a `?lang=` query-param override
+  (validated against supported locales, beats the cookie on that request so
+  hreflang targets render correctly, and the choice persists into the cookie
+  via the root loader's `Set-Cookie`).
+- **Why:** upstream routes the entire product at the root with several hundred
+  routes (auth, dashboard, admin, recipient signing tokens, API) plus emailed
+  signing URLs (`/sign/{token}`) — prefixing all of it with `/fr` would have
+  required touching every link/redirect/email template in the app and forked
+  the URL surface for zero functional gain this phase. The spec's fallback
+  clause applies: cookie-based switching with the tradeoff recorded.
+- **Consequence:** SEO-weighted `/fr/*` URLs are deferred (recorded as a
+  Phase 9/launch consideration); `.ca` TLD + `?lang=` alternates + hreflang
+  (D-023) carry discovery for now. `LanguageSwitcher` ships in the public
+  header/footer, auth pages, and the authenticated app header/footer.
+
+### D-023: hreflang via `?lang=` alternates (cookie strategy constraint)
+- **Decision:** root layout emits `<link rel="alternate" hreflang="en-CA"
+  href="/?lang=en">`, `fr-CA` → `/?lang=fr`, and `x-default` → `/` on every
+  page. Google strongly prefers distinct content URLs per locale; `?lang=` is
+  the only crawlable URL variant available under D-022.
+- **Why:** the spec requires hreflang on public pages; with a cookie-only
+  strategy there are no distinct URLs to point at. The `?lang=` param is
+  server-resolved (Step 2) so crawlers actually receive localized HTML.
+- **Consequence:** acceptable for MVP; if Quebec SEO becomes a launch
+  priority, revisit D-022 before Phase 9 marketing. Records that hreflang
+  here is best-effort under constraint.
+
+### D-024: Email locale chain kept as DocumentMeta.language → org → en (no schema change in Phase 4)
+- **Decision:** emails localize through the shared Lingui catalog via
+  `renderEmailWithI18N(template, { lang: emailLanguage })` where
+  `emailLanguage = DocumentMeta.language || organisationGlobalSettings.documentLanguage || 'en'`.
+  The envelope editor already exposes a per-document language picker that
+  writes `DocumentMeta.language`; FROM name is the non-translatable brand
+  constant "NorthSign" in both languages. No schema migration was added.
+- **Why:** the target chain “recipient's locale → document owner's locale →
+  en” requires new per-recipient and per-user `locale` columns plus
+  plumbing through envelope creation, signing sessions and jobs. That is a
+  compliance-workstream change (Phase 5, PIPEDA/Law 25), and Phase 4's
+  rule is to reuse upstream infrastructure without structural schema
+  drift. The per-document language picker + org default gives senders
+  explicit control today.
+- **Consequence:** recipients of fr envelopes get fr emails immediately;
+  the recipient's own locale cannot auto-select until Phase 5. Gap logged
+  in REVIEW-NOTES.md §4.4.
+
+### D-025: PDF signature text localized; per-document dateFormat stays user-controlled; CAD via Intl
+- **Decision:** the PDF signature dictionary reason and rejection stamp are
+  now localized via `getI18nInstance(DocumentMeta.language)` in
+  `seal-document.handler.ts`: « Signé électroniquement par NorthSign » and
+  « DOCUMENT REFUSÉ » (missing-`signPdf` reason parameter added to
+  `packages/signing`). `DocumentMeta.dateFormat` (luxon string the user
+  picks per document) is NOT locale-switched — user preference wins.
+  Currency is deferred to Phase 6 and will use `Intl.NumberFormat` CAD via
+  `i18n.number` (the i18n layer already delegates to Intl, so no new
+  infrastructure).
+- **Why:** the legal wording “signé électroniquement” is the mandated
+  fr-CA term (Charte de la langue française) and belongs in the signature
+  dictionary; overwriting a user-chosen date format because the viewer's
+  locale differs would corrupt signed-document presentation for no
+  compliance gain; CAD formatting only matters once billing exists.
+- **Consequence:** signed PDFs for fr-language documents carry the
+  localized reason regardless of who opens them (it is stamped at seal
+  time); date rendering follows locale in `i18n.date`-driven views and the
+  user's format in document views; Phase 6 wires `i18n.number` with CAD.

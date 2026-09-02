@@ -12,7 +12,7 @@
 | 1 | Foundation audit & dev environment | **complete** |
 | 2 | Rebranding (name, logo, colors, app copy) | **complete** |
 | 3 | Canadian hosting & data residency (AWS ca-central-1) | pending operator provisioning |
-| 4 | Bilingual i18n (EN/FR) with Lingui | pending |
+| 4 | Bilingual i18n (EN/FR) with Lingui | **complete** |
 | 5 | PIPEDA / Law 25 compliance workstream | pending |
 | 6 | Billing & plans (SMB pricing tiers) | pending |
 | 7 | Admin, audit trail & reporting | pending |
@@ -184,3 +184,88 @@ provisioned AWS/DNS and passed the first-deploy smoke test.
       drill scheduled
 - [ ] Phase 3 exit criteria: smoke-test checklist fully green and the
       residency claim verifiable from the running stack (see handoff)
+
+## Phase 4 — Bilingual i18n EN/FR (complete)
+
+1. **I18N inventory** — `I18N.md`: Lingui v5 confirmed as the single
+   translation system (web UI + react-email share one catalog,
+   `packages/lib/translations/{locale}/web.po`); upstream ships an fr
+   catalog (Crowdin community French, fr-FR-ish, 189 empty msgstrs);
+   locale detection was cookie → Accept-Language → en, with the switcher
+   only in the authenticated user menu.
+2. **Locale strategy (D-022/D-023)** — cookie-based switching kept (no
+   `/fr/*` subdirectories: spec fallback clause applied; hundreds of root
+   routes + emailed `/sign/{token}` links make prefixing impractical).
+   Added `?lang=` override (validated, beats cookie for the request,
+   persists into the cookie), hreflang alternates `en-CA`/`fr-CA`/
+   `x-default` in the root layout, and a new `LanguageSwitcher` in the
+   public header + footer, auth pages, and authenticated header + footer.
+3. **String extraction audit** — every hardcoded English UI string found
+   (aria/title/alt labels, admin stats chart title, meta description/
+   keywords/tagline, PDF text) routed through Lingui; the Phase 2 claim
+   "strings stay extractable" verified ✓ with a small residue list that is
+   intentionally not translatable (brand, protocol, attribution). See
+   `I18N.md` §4a.
+4. **fr-CA catalogs** — fr/web.po: 3,227 msgids, 100 % translated (374
+   machine-translated ids logged in `REVIEW-NOTES.md` for the Phase 9
+   polish pass); glossary (I18N.md §7) enforced: courriel (0 residual
+   e-mail/email in msgstrs), téléversement, piste d'audit, « Signé » for
+   the completed status, « vous » register. `scripts/fr-ca-tools.mjs`
+   + `scripts/fr-ca-missing-*.json` kept as provenance/tooling.
+5. **Email localization** — every react-email template renders through the
+   shared catalog; chain `DocumentMeta.language → org settings → en`
+   verified; the spec's recipient→owner→en intent needs a schema change
+   and is deferred to Phase 5 (D-024); FROM name stays "NorthSign" in
+   both languages.
+6. **Formatting** — `i18n.date()`/`i18n.number()` (Intl) drive locales:
+   fr-CA 24 h clock + AAAA-MM-JJ; per-document luxon `dateFormat` kept
+   user-controlled (D-025); PDF signature reason localized (« Signé
+   électroniquement par NorthSign ») + rejection stamp (« DOCUMENT
+   REFUSÉ »), keyed off `DocumentMeta.language` in the seal job;
+   CAD currency ready via `i18n.number` for Phase 6.
+7. **QA sweep** — `npm run lint` (Biome) still at the standing baseline of
+   **5 errors / 842 warnings** (no new diagnostics); `tsc --noEmit` clean
+   on every touched file (apps/remix, packages/ui, packages/signing,
+   packages/lib touched files; remaining lib/ui errors are pre-existing
+   Prisma-drift/upstream in untouched files); `lingui compile` green for
+   all 10 locales; fr catalog NUL-byte corruption found & fixed, verified
+   0 NUL bytes + valid UTF-8 + glossary greps clean. Runtime click-through
+   in both languages (sign-up → upload → send → sign → download) and
+   text-expansion layout QA are **deferred to the operator machine**
+   (sandbox has no Docker/Postgres — same limitation as Phases 1–2;
+   checklist in the handoff below).
+8. **Handoff** — `REVIEW-NOTES.md` (machine-translation log + polish-pass
+   gate: nothing ships to marketing before Phase 9), `DECISIONS.md`
+   D-022..D-025, this section, and the operator checklist below.
+
+### Status detail
+
+- [x] I18N.md inventory (library, catalogs, locales, detection, email
+      locale, formatting, glossary)
+- [x] D-022 cookie + `?lang=` strategy; D-023 hreflang alternates
+- [x] LanguageSwitcher shipped in public header/footer, auth pages,
+      authenticated header/footer; language cookie persists 2 years
+- [x] Step 3 extraction audit: all hardcoded UI/meta/PDF strings routed
+      through Lingui (see I18N.md §4a)
+- [x] fr/web.po 100 % translated (3,227 ids); en/fr id sets identical
+- [x] Glossary enforced (courriel / téléversement / piste d'audit /
+      signataire / « vous »); residual fr-FR sweep logged for Phase 9
+- [x] Email templates fr-CA via shared catalog; chain verified (D-024)
+- [x] PDF stamp + signature reason localized (D-025); Intl formatting
+      verified; CAD via i18n.number ready for Phase 6
+- [x] Biome baseline unchanged (5 errors / 842 warnings); touched files
+      tsc-clean; lingui compile green; catalog hygiene verified (no NULs)
+- [x] REVIEW-NOTES.md (374 machine-translated ids + polish gate)
+- [ ] **Operator machine (runtime QA):** `npm run dx` → `npm run dev` →
+      full signing flow in EN and FR (sign-up → upload → recipient →
+      send → sign → download, emails in Inbucket), verifying: zero
+      English leakage in the fr flow; language switcher in header/footer
+      on public + auth + dashboard pages; fr email received when the
+      envelope language is set to Français; signed PDF shows « Signé
+      électroniquement par NorthSign »; fr-CA dates render 24 h;
+      text-expansion pass on buttons/nav/modals/table headers (see
+      REVIEW-NOTES.md §4.5)
+
+> **Phase 4 note:** Phase 3 (hosting) remains at "pending operator
+> provisioning" — unrelated to Phase 4 completion; both land on the same
+> operator run.
