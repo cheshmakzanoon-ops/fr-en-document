@@ -385,10 +385,6 @@ msgid "{APP_DESCRIPTION} {APP_TAGLINE}. Built on {0}."
 msgstr "NorthSign — signature électronique hébergée au Canada, adaptée aux PME canadiennes. Signature de documents conforme à la LPRPDE et à la Loi 25, résidence des données au Canada et soutien complet en français pour le Québec. Basé sur {0}."
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-#~ msgid "{APP_NAME} will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
-#~ msgstr "{APP_NAME} supprimera <0>tous vos documents</0>, ainsi que tous vos documents signés, vos signatures et toutes les autres ressources appartenant à votre compte."
-
-#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
 msgid "{APP_NAME} will permanently delete your <0>draft documents and templates</0>, along with your sessions, API tokens, and other account resources. Documents you sent for signature — including completed ones — are <1>not destroyed</1>: they are transferred to a restricted service account and retained as legal records that co-signers may rely on. Consider downloading your data export first."
 msgstr "{APP_NAME} supprimera définitivement vos <0>brouillons de documents et modèles</0>, ainsi que vos sessions, jetons d’API et autres ressources de compte. Les documents que vous avez envoyés pour signature — y compris les documents complétés — ne sont <1>pas détruits</1> : ils sont transférés à un compte de service restreint et conservés comme registres juridiques sur lesquels les cosignataires peuvent s’appuyer. Pensez à télécharger d’abord votre exportation de données."
 
@@ -4119,10 +4115,6 @@ msgstr "Supprimer le jeton"
 #: apps/remix/app/components/dialogs/webhook-delete-dialog.tsx
 msgid "Delete Webhook"
 msgstr "Supprimer le Webhook"
-
-#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-#~ msgid "Delete your account and all its contents, including completed documents. This action is irreversible and will cancel your subscription, so proceed with caution."
-#~ msgstr "Supprimez votre compte et tout son contenu, y compris les documents complétés. Cette action est irréversible et annulera votre abonnement, soyez prudent."
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
 msgid "Delete your account. Documents you own that other parties rely on are kept as legal records (moved to a restricted service account); drafts and templates are removed. This action is irreversible and will cancel your subscription, so proceed with caution."

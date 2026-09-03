@@ -385,10 +385,6 @@ msgid "{APP_DESCRIPTION} {APP_TAGLINE}. Built on {0}."
 msgstr ""
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-#~ msgid "{APP_NAME} will delete <0>all of your documents</0>, along with all of your completed documents, signatures, and all other resources belonging to your Account."
-#~ msgstr ""
-
-#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
 msgid "{APP_NAME} will permanently delete your <0>draft documents and templates</0>, along with your sessions, API tokens, and other account resources. Documents you sent for signature — including completed ones — are <1>not destroyed</1>: they are transferred to a restricted service account and retained as legal records that co-signers may rely on. Consider downloading your data export first."
 msgstr ""
 
@@ -4119,10 +4115,6 @@ msgstr "Usuń token"
 #: apps/remix/app/components/dialogs/webhook-delete-dialog.tsx
 msgid "Delete Webhook"
 msgstr "Usuń webhook"
-
-#: apps/remix/app/components/dialogs/account-delete-dialog.tsx
-#~ msgid "Delete your account and all its contents, including completed documents. This action is irreversible and will cancel your subscription, so proceed with caution."
-#~ msgstr "Usuń swoje konto i wszystkie jego dane, w tym zakończone dokumenty. Ta akcja jest nieodwracalna i anuluje subskrypcję."
 
 #: apps/remix/app/components/dialogs/account-delete-dialog.tsx
 msgid "Delete your account. Documents you own that other parties rely on are kept as legal records (moved to a restricted service account); drafts and templates are removed. This action is irreversible and will cancel your subscription, so proceed with caution."
