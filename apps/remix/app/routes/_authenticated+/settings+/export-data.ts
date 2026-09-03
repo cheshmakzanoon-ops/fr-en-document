@@ -1,7 +1,7 @@
 import { getSession } from '@documenso/auth/server/lib/utils/get-session';
 import { exportUserData } from '@documenso/lib/server-only/user/export-user-data';
 
-import type { Route } from './+types/settings+.export-data';
+import type { Route } from './+types/export-data';
 
 /**
  * "Export my data" — PIPEDA cl. 4.9 access right and Quebec Law 25 s. 17
