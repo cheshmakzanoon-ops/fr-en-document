@@ -1,13 +1,23 @@
 import { prisma } from '@documenso/prisma';
 import { expect, test } from '@playwright/test';
 
-import { addRecipient, continueEditor, createDocument, InbucketClient, sendEnvelope, signup } from './helpers';
+import {
+  addRecipient,
+  addSignatureField,
+  completeSigning,
+  continueEditor,
+  createDocument,
+  InbucketClient,
+  sendEnvelope,
+  signup,
+} from './helpers';
 
 /**
  * GATE 1 — EN end-to-end signing flow.
  *
- * signup → upload → recipient → send → open signing link from Inbucket →
- * sign → download; asserts completed status + completion email.
+ * signup → email verification → upload → recipient → fields → send →
+ * signing link extracted from Inbucket → sign → complete; asserts completed
+ * status + completion email.
  */
 test('[NORTHSIGN][EN] full signing flow: signup → send → sign → complete', async ({ page }) => {
   const inbucket = new InbucketClient(page.context().request);
@@ -23,13 +33,9 @@ test('[NORTHSIGN][EN] full signing flow: signup → send → sign → complete',
 
   // Fields step: place a signature field for the recipient.
   await continueEditor({ page });
-  await page.getByRole('button', { name: 'Signature' }).click();
-  await page
-    .locator('.react-pdf__Page')
-    .first()
-    .click({ position: { x: 100, y: 100 } });
+  await addSignatureField({ page });
 
-  // Distribute step: send.
+  // Distribute step: send through the distribute dialog.
   await sendEnvelope({ page });
 
   // The recipient receives the signing invitation.
@@ -43,15 +49,7 @@ test('[NORTHSIGN][EN] full signing flow: signup → send → sign → complete',
   // Recipient opens the signing link and signs.
   await page.goto(signingUrl);
 
-  await page.getByTestId('signature-pad-dialog-button').click();
-  await page.getByRole('tab', { name: 'Type' }).click();
-  await page.getByTestId('signature-pad-type-input').fill('Recipient Signature');
-  await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('button', { name: 'Sign', exact: true }).click();
-
-  // Signing completes and the recipient lands on the completion page.
-  await page.waitForURL(/\/sign\/.+\/complete/, { timeout: 60_000 });
-  await expect(page.getByText('Document Signed')).toBeVisible();
+  await completeSigning({ page });
 
   // The envelope reaches COMPLETED status (sealed async → poll).
   await expect(async () => {

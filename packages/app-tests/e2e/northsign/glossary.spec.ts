@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+
 import { expect, test } from '@playwright/test';
 
 import { signup } from './helpers';
@@ -94,7 +95,11 @@ test('[NORTHSIGN][GLOSSARY] I18N.md glossary yields the expected banned rules', 
 });
 
 test('[NORTHSIGN][GLOSSARY] FR public pages carry no banned strings', async ({ page }) => {
+  // ?lang=fr is preserved by the root redirect and re-serialized into the lang
+  // cookie by the destination loader (D-022), so /signin renders in French.
   await page.goto('/?lang=fr');
+
+  await page.waitForURL(/\/signin/, { timeout: 15_000 });
 
   const landing = await page.locator('body').innerText();
 
@@ -102,20 +107,23 @@ test('[NORTHSIGN][GLOSSARY] FR public pages carry no banned strings', async ({ p
     expect(landing, `banned "${entry.label}" on landing (use « ${entry.replacement} »)`).not.toMatch(entry.pattern);
   }
 
-  await page.goto('/signin');
+  await page.goto('/signup');
 
-  const signinText = await page.locator('body').innerText();
+  const signupText = await page.locator('body').innerText();
 
   for (const entry of BANNED) {
-    expect(signinText, `banned "${entry.label}" on /signin (use « ${entry.replacement} »)`).not.toMatch(entry.pattern);
+    expect(signupText, `banned "${entry.label}" on /signup (use « ${entry.replacement} »)`).not.toMatch(entry.pattern);
   }
 });
 
 test('[NORTHSIGN][GLOSSARY] FR dashboard + settings carry no banned strings', async ({ page }) => {
-  const email = await signup({ page });
+  // Establish the FR session BEFORE signup so the whole flow runs in French.
+  await page.goto('/?lang=fr');
 
-  await page.goto('/dashboard');
-  await expect(page.getByText('Téléverser').first()).toBeVisible(); // FR session actually active
+  await signup({ page, locale: 'fr' });
+
+  // FR session actually active: the dashboard dropzone is localized.
+  await expect(page.getByText('Téléverser le document').first()).toBeVisible({ timeout: 15_000 });
 
   const dashboard = await page.locator('body').innerText();
 
@@ -134,8 +142,6 @@ test('[NORTHSIGN][GLOSSARY] FR dashboard + settings carry no banned strings', as
       entry.pattern,
     );
   }
-
-  void email;
 });
 
 test('[NORTHSIGN][GLOSSARY] FR signing page carries no banned strings', async ({ page }) => {

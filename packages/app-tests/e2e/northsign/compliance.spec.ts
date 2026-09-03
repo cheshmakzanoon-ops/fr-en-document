@@ -1,7 +1,17 @@
 import { prisma } from '@documenso/prisma';
 import { expect, test } from '@playwright/test';
 
-import { addRecipient, continueEditor, createDocument, InbucketClient, sendEnvelope, signin, signup } from './helpers';
+import {
+  addRecipient,
+  addSignatureField,
+  completeSigning,
+  continueEditor,
+  createDocument,
+  deleteAccount,
+  InbucketClient,
+  sendEnvelope,
+  signup,
+} from './helpers';
 
 /**
  * GATE 3 — Recipient-locale email regression.
@@ -22,19 +32,10 @@ test('[NORTHSIGN][I18N] recipient email follows recipient.language, owner email 
 
   const recipientEmail = `signer-frpref-${Date.now()}@northsign.test`;
 
-  await addRecipient({ page, email: recipientEmail });
-
-  // Set the recipient's language to Français via the per-recipient picker
-  // added in Phase 5 Step 6, while the document language stays English.
-  await page.getByRole('combobox').first().click();
-  await page.getByRole('option', { name: /Français/i }).click();
+  await addRecipient({ page, email: recipientEmail, language: 'fr' });
 
   await continueEditor({ page });
-  await page.getByRole('button', { name: 'Signature' }).click();
-  await page
-    .locator('.react-pdf__Page')
-    .first()
-    .click({ position: { x: 100, y: 100 } });
+  await addSignatureField({ page });
 
   await sendEnvelope({ page });
 
@@ -105,16 +106,17 @@ test('[NORTHSIGN][CONSENT] signup records consent rows; marketing opt-in uncheck
  * GATE 4b — Data export produces a downloadable JSON archive.
  */
 test('[NORTHSIGN][PRIVACY] data export downloads a JSON archive', async ({ page }) => {
-  const email = await signup({ page });
-
-  await signin({ page, email });
+  // Signup registers the account whose data is exported below.
+  await signup({ page });
 
   await page.goto('/settings/profile');
 
   const [download] = await Promise.all([
     page.waitForEvent('download', { timeout: 30_000 }),
+    // The export control is a plain <a download href> (profile.tsx), so it
+    // resolves as role=link — not a button.
     page
-      .getByRole('button', { name: /export/i })
+      .getByRole('link', { name: /download data export/i })
       .first()
       .click(),
   ]);
@@ -149,11 +151,7 @@ test('[NORTHSIGN][PRIVACY] account deletion orphans completed documents instead 
   await addRecipient({ page, email: recipientEmail });
 
   await continueEditor({ page });
-  await page.getByRole('button', { name: 'Signature' }).click();
-  await page
-    .locator('.react-pdf__Page')
-    .first()
-    .click({ position: { x: 100, y: 100 } });
+  await addSignatureField({ page });
 
   await sendEnvelope({ page });
 
@@ -163,13 +161,7 @@ test('[NORTHSIGN][PRIVACY] account deletion orphans completed documents instead 
 
   await page.goto(signingUrl);
 
-  await page.getByTestId('signature-pad-dialog-button').click();
-  await page.getByRole('tab', { name: 'Type' }).click();
-  await page.getByTestId('signature-pad-type-input').fill('Co-Signer');
-  await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('button', { name: 'Sign', exact: true }).click();
-
-  await page.waitForURL(/\/sign\/.+\/complete/, { timeout: 60_000 });
+  await completeSigning({ page });
 
   const envelopeBefore = await prisma.envelope.findFirstOrThrow({
     where: { recipients: { some: { email: recipientEmail } } },
@@ -177,22 +169,10 @@ test('[NORTHSIGN][PRIVACY] account deletion orphans completed documents instead 
 
   expect(envelopeBefore.status).toBe('COMPLETED');
 
-  // Owner deletes their account (Settings → Profile → Delete account).
-  await signin({ page, email: ownerEmail });
-
-  await page.goto('/settings/profile');
-
-  await page
-    .getByRole('button', { name: /delete/i })
-    .first()
-    .click();
-
-  // Confirmation dialog requires the word DELETE.
-  await page.getByPlaceholder(/DELETE/i).fill('DELETE');
-  await page
-    .getByRole('button', { name: /delete/i })
-    .last()
-    .click();
+  // Owner deletes their account (Settings → Profile → Delete account). The
+  // confirmation dialog requires typing the account email, then "Confirm
+  // Deletion" (helpers.deleteAccount).
+  await deleteAccount({ page, email: ownerEmail });
 
   await page.waitForURL(/signin|dashboard/, { timeout: 60_000 });
 

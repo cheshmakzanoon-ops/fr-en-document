@@ -1,4 +1,5 @@
 import path from 'node:path';
+
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -6,62 +7,202 @@ const FIXTURE_PDF = path.join(__dirname, 'fixtures/tiny.pdf');
 
 export const TEST_PASSWORD = 'Test-Passw0rd-Long-Enough!';
 
+export type TestLocale = 'en' | 'fr';
+
 /**
- * Sign up a brand-new user through the real /signup UI (no seed script).
+ * UI labels per locale, verified against the Lingui catalogs
+ * (packages/lib/translations/{en,fr}/web.po). The suite signs up and drives
+ * the editor in whichever locale the session cookie carries, so the helpers
+ * must know both label sets.
+ */
+const LABELS: Record<
+  TestLocale,
+  {
+    fullName: string;
+    emailAddress: string;
+    /** Sign-in form email label ("Email" / "courriel") — differs from signup. */
+    signinEmail: RegExp;
+    password: string;
+    typeTab: string;
+    next: string;
+    createAccount: string;
+    signIn: string;
+    emailConfirmed: RegExp;
+    recipientPlaceholder: RegExp;
+    sendDocument: string;
+    send: string;
+    uploadDocument: string;
+    signature: string;
+    emailConfirmedShort: string;
+    /** Trigger button of the signing complete-dialog when all fields are done. */
+    complete: string;
+    /** Submit button inside the signing complete-dialog. */
+    sign: string;
+    /** Completion page heading for a signer. */
+    documentSigned: string;
+    /** Next Field — trigger when fields remain. */
+    nextField: string;
+    /** Per-recipient language picker labels — rendered in the SESSION locale
+     * (SUPPORTED_LANGUAGES full names go through Lingui), not the target
+     * language. An English session shows "French"; a French one "Français". */
+    languageEn: RegExp;
+    languageFr: RegExp;
+  }
+> = {
+  en: {
+    fullName: 'Full Name',
+    emailAddress: 'Email Address',
+    signinEmail: /^Email$/i,
+    password: 'Password',
+    typeTab: 'Type',
+    next: 'Next',
+    createAccount: 'Create account',
+    signIn: 'Sign In',
+    emailConfirmed: /Email Confirmed!/i,
+    recipientPlaceholder: /Recipient 1/,
+    sendDocument: 'Send Document',
+    send: 'Send',
+    uploadDocument: 'Upload Document',
+    signature: 'Signature',
+    emailConfirmedShort: 'Email Confirmed!',
+    complete: 'Complete',
+    sign: 'Sign',
+    documentSigned: 'Document Signed',
+    nextField: 'Next Field',
+    languageEn: /^English$/i,
+    languageFr: /^French$/i,
+  },
+  fr: {
+    fullName: 'Nom complet',
+    emailAddress: 'Adresse courriel',
+    signinEmail: /^courriel$/i,
+    password: 'Mot de passe',
+    typeTab: 'Saisir',
+    next: 'Suivant',
+    createAccount: 'Créer un compte',
+    signIn: 'Se connecter',
+    emailConfirmed: /courriel confirmé/i,
+    recipientPlaceholder: /Destinataire 1/,
+    sendDocument: 'Envoyer le document',
+    send: 'Envoyer',
+    uploadDocument: 'Téléverser le document',
+    signature: 'Signature',
+    emailConfirmedShort: 'courriel confirmé',
+    complete: 'Compléter',
+    sign: 'Signer',
+    documentSigned: 'Document signé',
+    nextField: 'Champ suivant',
+    languageEn: /^Anglais$/i,
+    languageFr: /^Français$/i,
+  },
+};
+
+/**
+ * Sign up a brand-new user through the real /signup UI (no seed script),
+ * confirm the email address through the real verification email, and sign in.
  *
  * Returns the email used, so tests can assert against Inbucket mailboxes.
- * The account is deliberately left email-unverified: the Phase 5.5 gates
- * assert behaviour for a fresh signup exactly as a new user experiences it
- * (unverified accounts can still use the app — there is only a banner).
+ *
+ * Why the full verification: signup does NOT mint a session, and the server
+ * rejects sign-in for unverified accounts (UNVERIFIED_EMAIL) — a brand-new
+ * account cannot reach the dashboard until its email is confirmed. The only
+ * real path in is the emailed /verify-email/{token} link, which also
+ * auto-authenticates the user on success.
  */
-export const signup = async ({ page }: { page: Page }): Promise<string> => {
+export const signup = async ({ page, locale = 'en' }: { page: Page; locale?: TestLocale }): Promise<string> => {
+  const L = LABELS[locale];
+  const inbucket = new InbucketClient(page.context().request);
   const email = `e2e-${Date.now()}-${Math.floor(Math.random() * 10_000)}@northsign.test`;
 
   await page.goto('/signup');
 
-  await page.getByLabel('Full Name').fill('NorthSign E2E');
-  await page.getByLabel('Email Address').fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(TEST_PASSWORD);
+  await page.getByLabel(L.fullName).fill('NorthSign E2E');
+  await page.getByLabel(L.emailAddress).fill(email);
+  await page.getByLabel(L.password, { exact: true }).fill(TEST_PASSWORD);
 
-  // Signature pad: draw via the "type" tab and save.
+  // Signature pad: draw via the "type" tab.
+  // The dialog's confirm button ("Next") applies the typed signature and
+  // closes the dialog in one step — there is no separate Save step.
   await page.getByTestId('signature-pad-dialog-button').click();
-  await page.getByRole('tab', { name: 'Type' }).click();
+  await page.getByRole('tab', { name: L.typeTab }).click();
   await page.getByTestId('signature-pad-type-input').fill('NorthSign E2E');
-  await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: L.next }).click();
 
   await page.getByRole('checkbox').first().check(); // acceptTerms (ToS/Privacy)
   // marketingOptIn intentionally left unchecked — asserted in the consent test.
 
-  await page.getByRole('button', { name: 'Create account' }).click();
+  await page.getByRole('button', { name: L.createAccount }).click();
 
   // Successful signup lands on /unverified-account (email-confirmation page).
-  await expect(page).toHaveURL(/\/unverified-account/);
+  await expect(page).toHaveURL(/\/unverified-account/, { timeout: 30_000 });
+
+  // Confirm the address through the emailed verification link.
+  const localPart = email.split('@')[0];
+  const confirmation = await inbucket.waitForMessage(localPart, () => true);
+  const confirmationUrl = await inbucket.extractVerificationLink(localPart, confirmation.id);
+
+  await page.goto(confirmationUrl);
+
+  // The token page verifies asynchronously on mount; wait for the confirmed
+  // state (this endpoint also auto-authenticates the user).
+  await expect(page.getByText(L.emailConfirmedShort).first()).toBeVisible({ timeout: 30_000 });
+
+  // Email confirmed → sign in (skipped when verification already logged us in).
+  await signin({ page, email, locale });
 
   return email;
 };
 
 /**
- * Sign in as an existing (verified or unverified) user through the API +
- * session cookie, matching the upstream app-tests fixture approach.
+ * Sign in as an existing user through the UI so the session cookie is minted
+ * exactly like a real browser session.
+ *
+ * Skips the form when the current session is already authenticated: the app
+ * bounces /signin into the authenticated area, and there is no form to fill.
  */
-export const signin = async ({ page, email }: { page: Page; email: string }): Promise<void> => {
-  // The auth stack is better-auth-based in this fork; sign in through the UI
-  // so the session cookie is minted exactly like a real browser session.
-  await page.goto('/signin');
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(TEST_PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+export const signin = async ({
+  page,
+  email,
+  locale = 'en',
+}: {
+  page: Page;
+  email: string;
+  locale?: TestLocale;
+}): Promise<void> => {
+  const L = LABELS[locale];
 
-  await expect(page).toHaveURL(/\/dashboard|\/t\//, { timeout: 30_000 });
+  await page.goto('/signin');
+
+  // Already authenticated? The app redirects /signin to the dashboard/documents.
+  const emailField = page.getByLabel(L.signinEmail);
+  const isOnSigninForm = await emailField
+    .first()
+    .waitFor({ state: 'visible', timeout: 5_000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!isOnSigninForm) {
+    return;
+  }
+
+  await emailField.first().fill(email);
+  await page.getByLabel(L.password, { exact: true }).fill(TEST_PASSWORD);
+  await page.getByRole('button', { name: L.signIn }).click();
+
+  await expect(page).toHaveURL(/\/t\/|\/documents/, { timeout: 30_000 });
 };
 
 /**
  * Create (upload) a new document from the tiny 1-page PDF fixture and land on
  * the envelope editor. Assumes the caller is signed in and on any page.
  */
-export const createDocument = async ({ page }: { page: Page }): Promise<string> => {
+export const createDocument = async ({ page, locale = 'en' }: { page: Page; locale?: TestLocale }): Promise<string> => {
+  const L = LABELS[locale];
+
   await page.goto('/dashboard');
+
+  // The documents page renders the dropzone with the localized upload label.
+  await expect(page.getByText(L.uploadDocument).first()).toBeVisible();
 
   // Trigger the file input behind the upload dropzone.
   const [fileChooser] = await Promise.all([
@@ -91,61 +232,189 @@ export type AddRecipientOptions = {
   page: Page;
   email: string;
   name?: string;
+  locale?: TestLocale;
+  /** Set the per-recipient email language (Phase 5 Step 6 picker). */
+  language?: 'en' | 'fr';
 };
 
 /**
- * In the envelope editor, add a signer through Step 2 (Add Signers) of the
- * envelope flow. Leaves the editor on the recipients step.
+ * In the envelope editor (upload step), fill the first recipient row through
+ * the real "Add Signer" form. When `language` is set, also picks that locale
+ * in the per-recipient language picker (Phase 5 Step 6). Recipients are
+ * auto-saved by the editor (debounced sync) — no explicit submit exists.
  */
-export const addRecipient = async ({ page, email, name = 'Recipient' }: AddRecipientOptions): Promise<void> => {
-  // Step 1 (General) → Continue
-  const continueButton = page.getByRole('button', { name: 'Continue' });
+export const addRecipient = async ({
+  page,
+  email,
+  name,
+  locale = 'en',
+  language,
+}: AddRecipientOptions): Promise<void> => {
+  const L = LABELS[locale];
 
-  await expect(continueButton).toBeVisible();
+  // The editor starts with one empty signer row.
+  const emailInput = page.getByTestId('signer-email-input');
+  await expect(emailInput.first()).toBeVisible();
 
-  await continueButton.click();
+  await emailInput.first().fill(email);
 
-  // Step 2 (Add Signers): fill the first recipient row.
-  await page.getByPlaceholder('Email').first().fill(email);
-  await page.getByPlaceholder('Name').first().fill(name);
+  if (name) {
+    await page.getByPlaceholder(L.recipientPlaceholder).first().fill(name);
+  }
 
-  // Do NOT press Continue here: the recipient-locale test needs to set the
-  // language picker first. Callers proceed with `continueEditor`.
+  if (language) {
+    await page.getByTestId('recipient-language-trigger').first().click();
+
+    // Options render in the session's language (Lingui-translated full names),
+    // NOT in the selected language — pick by session-localized label.
+    await page.getByRole('option', { name: language === 'fr' ? L.languageFr : L.languageEn }).click();
+  }
 };
 
 /**
- * Press "Continue" in the envelope editor (from recipients to fields step).
+ * Move from the upload/recipients step to the fields step ("Add Fields").
  */
 export const continueEditor = async ({ page }: { page: Page }): Promise<void> => {
-  await page.getByRole('button', { name: 'Continue' }).click();
+  // The step selector exposes a stable testid (locale-independent).
+  await page.getByTestId('envelope-editor-step-addFields').click();
 };
 
 /**
  * Place a signature field near the top-left of the first PDF page (fields
- * step). The active recipient is whichever the editor currently targets.
+ * step): select the Signature field type, then click the page.
+ *
+ * The click target is the Konva stage canvas layered over the PDF page, not
+ * the `.react-pdf__Page` element beneath it — the canvas sits at z-10 and
+ * intercepts pointer events (same gesture as the upstream suite's
+ * placeFieldOnPdf). The helper then waits until the field actually exists on
+ * the stage, so callers can send immediately after.
  */
-export const addSignatureField = async ({ page }: { page: Page }): Promise<void> => {
-  await page.getByRole('button', { name: 'Signature' }).click();
-  await page
-    .locator('[data-testid="pdf-editor-page-1"], .pdf-editor-page')
-    .first()
-    .click({
-      position: { x: 100, y: 100 },
+export const addSignatureField = async ({
+  page,
+  locale = 'en',
+}: {
+  page: Page;
+  locale?: TestLocale;
+}): Promise<void> => {
+  const L = LABELS[locale];
+
+  await page.getByRole('button', { name: L.signature, exact: true }).first().click();
+
+  const canvas = page.locator('.konva-container canvas').first();
+
+  await expect(canvas).toBeVisible();
+  await canvas.click({
+    position: { x: 150, y: 150 },
+  });
+
+  // The field is created through editorFields.addField() once the click lands
+  // on the page; poll the Konva stage instead of guessing a fixed delay.
+  await expect(async () => {
+    const fieldCount = await page.evaluate(() => {
+      const konva = (
+        window as unknown as {
+          Konva?: { stages: Array<{ attrs: { id?: string }; find: (selector: string) => unknown[] }> };
+        }
+      ).Konva;
+
+      const pageOne = konva?.stages.find((stage) => stage.attrs.id === 'page-1');
+
+      return pageOne?.find('.field-group').length ?? 0;
     });
+
+    expect(fieldCount).toBeGreaterThan(0);
+  }).toPass({ timeout: 15_000 });
 };
 
 /**
- * Send the envelope (Distribute step) and wait for the redirect back to the
- * documents list.
+ * Send the envelope through the real "Send Document" → distribute dialog and
+ * wait for the redirect back to the documents list.
  */
-export const sendEnvelope = async ({ page }: { page: Page }): Promise<void> => {
-  await page.getByRole('button', { name: 'Continue' }).click();
+export const sendEnvelope = async ({ page, locale = 'en' }: { page: Page; locale?: TestLocale }): Promise<void> => {
+  const L = LABELS[locale];
 
-  await page.waitForTimeout(2500); // Distribution step mounts async.
+  await page.getByRole('button', { name: L.sendDocument, exact: true }).first().click();
 
-  await page.getByRole('button', { name: 'Send', exact: true }).click();
+  // Distribute dialog mounts async; the submit button carries the same label
+  // in both locales ("Send" / "Envoyer").
+  const sendButton = page.getByRole('button', { name: L.send, exact: true });
+
+  await expect(sendButton).toBeVisible({ timeout: 15_000 });
+  await sendButton.click();
 
   await page.waitForURL(/\/documents/, { timeout: 30_000 });
+};
+
+/**
+ * Complete the signing page as the recipient: draw a typed signature through
+ * the signature-pad dialog, then finish through the completion dialog.
+ *
+ * Dialog flow (document-signing-complete-dialog.tsx): the trigger button is
+ * "Complete" once all fields are done (or "Next Field" while fields remain);
+ * it opens a confirmation dialog whose submit button is "Sign".
+ */
+export const completeSigning = async ({ page, locale = 'en' }: { page: Page; locale?: TestLocale }): Promise<void> => {
+  const L = LABELS[locale];
+
+  await page.getByTestId('signature-pad-dialog-button').click();
+  await page.getByRole('tab', { name: L.typeTab }).click();
+  await page.getByTestId('signature-pad-type-input').fill(locale === 'fr' ? 'Signataire' : 'Recipient Signature');
+  await page.getByRole('button', { name: L.next }).click();
+
+  // Trigger of the completion dialog (opens "Are you sure?" confirmation).
+  const completeTrigger = page.getByRole('button', { name: L.complete, exact: true });
+
+  await expect(completeTrigger).toBeVisible({ timeout: 15_000 });
+  await completeTrigger.click();
+
+  // Submit inside the confirmation dialog.
+  const signSubmit = page.getByRole('button', { name: L.sign, exact: true });
+
+  await expect(signSubmit).toBeVisible({ timeout: 15_000 });
+  await signSubmit.click();
+
+  await page.waitForURL(/\/sign\/.+\/complete/, { timeout: 60_000 });
+  await expect(page.getByText(L.documentSigned).first()).toBeVisible({ timeout: 30_000 });
+};
+
+/**
+ * Delete the currently signed-in user's account through Settings → Profile.
+ *
+ * The confirmation dialog requires typing the ACCOUNT EMAIL (not "DELETE")
+ * and clicking "Confirm Deletion".
+ */
+export const deleteAccount = async ({ page, email }: { page: Page; email: string }): Promise<void> => {
+  await page.goto('/settings/profile');
+
+  await page
+    .getByRole('button', { name: /delete account/i })
+    .first()
+    .click();
+
+  // aria-label "Confirm Email" input; type the account email to enable the button.
+  const confirmEmailInput = page.getByLabel(/Confirm Email/i);
+
+  await expect(confirmEmailInput).toBeVisible({ timeout: 15_000 });
+
+  // The dialog's label embeds the account email; extract it (falls back to
+  // the email passed by the caller when the parse fails).
+  const labelText = await confirmEmailInput.evaluate((element) => {
+    const dialog = element.closest('[role="dialog"]');
+
+    if (!dialog) {
+      return '';
+    }
+
+    const label = dialog.querySelector('label');
+
+    return label?.textContent?.trim() ?? '';
+  });
+
+  const emailMatch = /[\w.+-]+@[\w-]+\.[\w.-]+/.exec(labelText);
+  const emailToType = emailMatch ? emailMatch[0] : email;
+
+  await confirmEmailInput.fill(emailToType);
+  await page.getByRole('button', { name: /confirm deletion/i }).click();
 };
 
 /**
@@ -187,6 +456,17 @@ export class InbucketClient {
     return message.body?.text ?? message.text ?? '';
   }
 
+  /** Fetch a single message including its HTML part. */
+  private async getMessageParts(localPart: string, messageId: string): Promise<{ text: string; html: string }> {
+    const response = await this.request.get(`${this.baseUrl}/api/v1/mailbox/${localPart}/${messageId}`);
+
+    expect(response.ok()).toBeTruthy();
+
+    const message = (await response.json()) as { body?: { text?: string; html?: string } };
+
+    return { text: message.body?.text ?? '', html: message.body?.html ?? '' };
+  }
+
   /** Wait until a message matching `predicate` arrives (or timeout). */
   async waitForMessage(
     localPart: string,
@@ -212,6 +492,19 @@ export class InbucketClient {
       `No matching message in mailbox "${localPart}" within ${timeoutMs}ms. ` +
         `Mailbox contents: ${JSON.stringify(messages.map((m) => m.subject))}`,
     );
+  }
+
+  /** Extract the first /verify-email/{token} link from a message body. */
+  async extractVerificationLink(localPart: string, messageId: string): Promise<string> {
+    const { text, html } = await this.getMessageParts(localPart, messageId);
+
+    const match = /https?:\/\/[^\s"'<>]+\/verify-email\/[A-Za-z0-9]+/.exec(`${html}\n${text}`);
+
+    if (!match) {
+      throw new Error(`No verification link found in message ${messageId} for ${localPart}`);
+    }
+
+    return match[0];
   }
 
   /** Extract the first /sign/{token} link from a message body. */
