@@ -11,6 +11,12 @@ import type { Route } from './+types/_index';
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await getOptionalSession(request);
 
+  // Preserve the explicit `?lang=` override (hreflang alternates, D-022) across
+  // this redirect: the root loader of the target route re-resolves the locale
+  // and re-serializes the `lang` cookie, but only if the query param survives.
+  const langParam = new URL(request.url).searchParams.get('lang');
+  const langSuffix = langParam ? `?lang=${encodeURIComponent(langParam)}` : '';
+
   if (session.isAuthenticated) {
     const teamUrlCookie = extractCookieFromHeaders(PREFERRED_TEAM_URL_COOKIE, request.headers);
 
@@ -42,11 +48,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     if (!currentTeam) {
-      throw redirect('/inbox');
+      throw redirect(`/inbox${langSuffix}`);
     }
 
-    throw redirect(formatDocumentsPath(currentTeam.url));
+    throw redirect(`${formatDocumentsPath(currentTeam.url)}${langSuffix}`);
   }
 
-  throw redirect('/signin');
+  throw redirect(`/signin${langSuffix}`);
 }
