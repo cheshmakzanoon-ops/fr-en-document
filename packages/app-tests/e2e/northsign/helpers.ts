@@ -346,12 +346,20 @@ export const sendEnvelope = async ({ page, locale = 'en' }: { page: Page; locale
 };
 
 /**
- * Complete the signing page as the recipient: draw a typed signature through
- * the signature-pad dialog, then finish through the completion dialog.
+ * Complete the signing page as the recipient: stage a typed signature through
+ * the sidebar signature-pad dialog, insert it by clicking the signature field
+ * on the PDF, then finish through the completion dialog.
  *
- * Dialog flow (document-signing-complete-dialog.tsx): the trigger button is
- * "Complete" once all fields are done (or "Next Field" while fields remain);
- * it opens a confirmation dialog whose submit button is "Sign".
+ * Two-step flow (matches how the app works, see upstream e2e/fixtures/signature.ts):
+ * 1. The sidebar pad (document-signing-form.tsx) only STAGES the signature in
+ *    the signing context — its confirm button is "Next"/"Suivant".
+ * 2. The field on the page must then be CLICKED (document-signing-field-container.tsx
+ *    → handleInsertField → signFieldWithToken) for field.inserted to become true.
+ *    The completion-dialog trigger stays "Next Field" until every required
+ *    field is inserted, and only then reads "Complete".
+ *
+ * The completion dialog (document-signing-complete-dialog.tsx) opens an
+ * "Are you sure?" confirmation whose submit button is "Sign"/"Signer".
  */
 export const completeSigning = async ({ page, locale = 'en' }: { page: Page; locale?: TestLocale }): Promise<void> => {
   const L = LABELS[locale];
@@ -360,6 +368,17 @@ export const completeSigning = async ({ page, locale = 'en' }: { page: Page; loc
   await page.getByRole('tab', { name: L.typeTab }).click();
   await page.getByTestId('signature-pad-type-input').fill(locale === 'fr' ? 'Signataire' : 'Recipient Signature');
   await page.getByRole('button', { name: L.next }).click();
+
+  // Insert the signature by clicking the (unsigned) signature field rendered
+  // on the PDF page. The data attributes are locale-independent.
+  const signatureField = page.locator('[data-field-type="SIGNATURE"]').first();
+
+  await expect(signatureField).toHaveAttribute('data-inserted', 'false', { timeout: 15_000 });
+  await signatureField.click();
+
+  // Insertion is async (mutation + revalidate) — poll until the field flips
+  // to inserted, which is also when the trigger below becomes "Complete".
+  await expect(signatureField).toHaveAttribute('data-inserted', 'true', { timeout: 15_000 });
 
   // Trigger of the completion dialog (opens "Are you sure?" confirmation).
   const completeTrigger = page.getByRole('button', { name: L.complete, exact: true });
