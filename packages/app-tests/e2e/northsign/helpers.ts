@@ -350,13 +350,23 @@ export const sendEnvelope = async ({ page, locale = 'en' }: { page: Page; locale
  * the sidebar signature-pad dialog, insert it by clicking the signature field
  * on the PDF, then finish through the completion dialog.
  *
- * Two-step flow (matches how the app works, see upstream e2e/fixtures/signature.ts):
- * 1. The sidebar pad (document-signing-form.tsx) only STAGES the signature in
+ * Two-step flow (matches how the app works — see the upstream V2 spec in
+ * packages/app-tests/e2e/envelopes/envelope-v2-field-insertion.spec.ts):
+ * 1. The sidebar pad (envelope-signer-form.tsx) only STAGES the signature in
  *    the signing context — its confirm button is "Next"/"Suivant".
- * 2. The field on the page must then be CLICKED (document-signing-field-container.tsx
- *    → handleInsertField → signFieldWithToken) for field.inserted to become true.
- *    The completion-dialog trigger stays "Next Field" until every required
- *    field is inserted, and only then reads "Complete".
+ * 2. The field on the page must then be CLICKED for field.inserted to become
+ *    true. The document fields are drawn on a KONVA CANVAS (not DOM
+ *    elements): the signing renderer (envelope-signer-page-renderer.tsx →
+ *    handleFieldGroupClick → handleSignatureFieldClick → signEnvelopeField)
+ *    inserts the staged signature on a canvas field click. The
+ *    completion-dialog trigger stays "Next Field" until every required field
+ *    is inserted, and only then reads "Complete".
+ *
+ * Konva exposes itself as window.Konva whenever a stage is mounted; each
+ * field is a group with name="field-group" carrying the field's DB id, on
+ * the stage whose id is page-<n>. We resolve the field group's canvas
+ * position with getClientRect() and click the canvas there — locale- and
+ * scale-independent.
  *
  * The completion dialog (document-signing-complete-dialog.tsx) opens an
  * "Are you sure?" confirmation whose submit button is "Sign"/"Signer".
@@ -369,21 +379,55 @@ export const completeSigning = async ({ page, locale = 'en' }: { page: Page; loc
   await page.getByTestId('signature-pad-type-input').fill(locale === 'fr' ? 'Signataire' : 'Recipient Signature');
   await page.getByRole('button', { name: L.next }).click();
 
-  // Insert the signature by clicking the (unsigned) signature field rendered
-  // on the PDF page. The data attributes are locale-independent.
-  const signatureField = page.locator('[data-field-type="SIGNATURE"]').first();
+  // Wait for the Konva canvas overlay that sits on top of the PDF page.
+  const canvas = page.locator('.konva-container canvas').first();
 
-  await expect(signatureField).toHaveAttribute('data-inserted', 'false', { timeout: 15_000 });
-  await signatureField.click();
+  await expect(canvas).toBeVisible({ timeout: 30_000 });
 
-  // Insertion is async (mutation + revalidate) — poll until the field flips
-  // to inserted, which is also when the trigger below becomes "Complete".
-  await expect(signatureField).toHaveAttribute('data-inserted', 'true', { timeout: 15_000 });
+  // Resolve the first (only) field group of page 1 to a clickable canvas
+  // position. getClientRect() returns the rendered rect including the stage
+  // scale, in CSS pixels relative to the canvas top-left.
+  const signaturePoint = await page.evaluate(() => {
+    const konva = (
+      window as unknown as {
+        Konva?: {
+          stages: Array<{
+            attrs: { id?: string };
+            find: (selector: string) => Array<{
+              getClientRect: () => { x: number; y: number; width: number; height: number };
+            }>;
+          }>;
+        };
+      }
+    ).Konva;
+
+    const pageOne = konva?.stages.find((stage) => stage.attrs.id === 'page-1');
+    const fieldGroup = pageOne?.find('.field-group')[0];
+
+    if (!fieldGroup) {
+      return null;
+    }
+
+    const rect = fieldGroup.getClientRect();
+
+    return {
+      x: rect.x + rect.width / 2,
+      y: rect.y + rect.height / 2,
+    };
+  });
+
+  if (!signaturePoint) {
+    throw new Error('Signature field not found: no .field-group on Konva stage page-1 of the signing page');
+  }
+
+  // Click the field to insert the staged signature (async mutation +
+  // revalidate — the trigger below flips to "Complete" once inserted).
+  await canvas.click({ position: signaturePoint });
 
   // Trigger of the completion dialog (opens "Are you sure?" confirmation).
   const completeTrigger = page.getByRole('button', { name: L.complete, exact: true });
 
-  await expect(completeTrigger).toBeVisible({ timeout: 15_000 });
+  await expect(completeTrigger).toBeVisible({ timeout: 20_000 });
   await completeTrigger.click();
 
   // Submit inside the confirmation dialog.
