@@ -2,6 +2,7 @@ import { useLimits } from '@documenso/ee/server-only/limits/provider/client';
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
 import { useCurrentOrganisation } from '@documenso/lib/client-only/providers/organisation';
 import { useSession } from '@documenso/lib/client-only/providers/session';
+import { isValidLanguageCode } from '@documenso/lib/constants/i18n';
 import { TIME_ZONES } from '@documenso/lib/constants/time-zones';
 import { AppError } from '@documenso/lib/errors/app-error';
 import { formatDocumentsPath, formatTemplatesPath } from '@documenso/lib/utils/teams';
@@ -76,6 +77,12 @@ export const EnvelopeUploadButton = ({ className, type, folderId }: EnvelopeUplo
         title: files[0].name,
         meta: {
           timezone: userTimezone,
+          // New documents inherit the sender's active UI language so email
+          // localisation matches the product language the sender is using
+          // (I18N.md §5 email chain; DocumentMeta.language default). The
+          // per-document picker and org/team defaults still override it when
+          // set explicitly at send time.
+          language: isValidLanguageCode(i18n.locale) ? i18n.locale : undefined,
         },
       } satisfies TCreateEnvelopePayload;
 

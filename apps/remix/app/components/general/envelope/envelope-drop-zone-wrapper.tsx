@@ -4,6 +4,7 @@ import { useCurrentOrganisation } from '@documenso/lib/client-only/providers/org
 import { useSession } from '@documenso/lib/client-only/providers/session';
 import { APP_DOCUMENT_UPLOAD_SIZE_LIMIT, IS_BILLING_ENABLED } from '@documenso/lib/constants/app';
 import { getAllowedUploadMimeTypes } from '@documenso/lib/constants/document-conversion';
+import { isValidLanguageCode } from '@documenso/lib/constants/i18n';
 import { DEFAULT_DOCUMENT_TIME_ZONE, TIME_ZONES } from '@documenso/lib/constants/time-zones';
 import { AppError } from '@documenso/lib/errors/app-error';
 import { megabytesToBytes } from '@documenso/lib/universal/unit-convertions';
@@ -69,6 +70,12 @@ export const EnvelopeDropZoneWrapper = ({ children, type, className }: EnvelopeD
         title: files[0].name,
         meta: {
           timezone: userTimezone,
+          // New documents inherit the sender's active UI language so email
+          // localisation matches the product language the sender is using
+          // (I18N.md §5 email chain; DocumentMeta.language default). The
+          // per-document picker and org/team defaults still override it when
+          // set explicitly at send time.
+          language: isValidLanguageCode(i18n.locale) ? i18n.locale : undefined,
         },
       } satisfies TCreateEnvelopePayload;
 
