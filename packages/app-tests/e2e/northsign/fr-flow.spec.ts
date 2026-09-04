@@ -45,13 +45,22 @@ test('[NORTHSIGN][FR] full signing flow in French with canary assertions', async
 
   await sendEnvelope({ page, locale: 'fr' });
 
-  // Canaries on the documents dashboard: « Piste d'audit » appears in the
-  // document dropdown menu ("Audit Logs" → « Journaux de vérification » on
-  // lists; the audit-log page itself carries « Piste d'audit »).
+  // Canary: the document action menu (document view page) carries the FR
+  // audit-log entry « Journaux de vérification » ("Audit Logs"). The item
+  // only exists once the row's document page is open and its menu expanded,
+  // so drive the real UI: open tiny.pdf → open the action dropdown.
   await page.goto('/dashboard');
-  await expect(page.getByText(/Piste d[’']audit|Journaux de vérification/).first()).toBeVisible({ timeout: 15_000 });
 
-  // Dates render 24 h (fr-CA): no "AM"/"PM" markers in table content.
+  await page.getByRole('row').filter({ hasText: 'tiny.pdf' }).getByRole('link').first().click();
+
+  await page.getByTestId('document-page-view-action-btn').click();
+
+  await expect(page.getByText('Journaux de vérification').first()).toBeVisible({ timeout: 15_000 });
+
+  // Back on the documents list: dates render 24 h (fr-CA) — no "AM"/"PM"
+  // markers anywhere in the table content.
+  await page.goto('/dashboard');
+
   const tableText = await page.locator('table, [role="table"], main').first().innerText();
   expect(tableText).not.toMatch(/\b(AM|PM)\b/);
 
