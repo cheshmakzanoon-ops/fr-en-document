@@ -21,10 +21,9 @@ export type DocumentLogsTableProps = {
   userId?: number;
 };
 
-const dateFormat: DateTimeFormatOptions = {
-  ...DateTime.DATETIME_SHORT,
-  hourCycle: 'h12',
-};
+// No hourCycle override: Intl picks the active locale's clock convention
+// (fr-CA → 24 h, en → 12 h) — see I18N.md §6.
+const dateFormat: DateTimeFormatOptions = DateTime.DATETIME_SHORT;
 
 export const DocumentLogsTable = ({ documentId, userId }: DocumentLogsTableProps) => {
   const { _, i18n } = useLingui();
