@@ -16,7 +16,7 @@
 | 5 | PIPEDA / Law 25 compliance workstream | **complete** (DRAFT-review gates pending) |
 | 5.5 | CI + automated E2E verification | **complete** (pipeline shipped; first run expected red) |
 | 5.6 | Push, watch CI, fix — first green run | **complete** (all gates green, see Phase 5.6) |
-| 6 | Billing & plans (SMB pricing tiers) | **in progress** (BILLING.md, D-031..D-034) |
+| 6 | Billing & plans (SMB pricing tiers) | **complete — awaiting green CI** (BILLING.md, D-031..D-036) |
 | 7 | Admin, audit trail & reporting | pending |
 | 8 | Onboarding, templates & integrations | pending |
 | 9 | Hardening, load & security testing | pending |
@@ -467,3 +467,33 @@ boots, renders, sends email, signs, completes, exports, and deletes under
 CI. Still manual before launch: REVIEW-NOTES.md §4.5 visual text-expansion
 review, the production smoke test, and the CI.md §6 branch-protection task
 (GitHub settings, operator-only).
+
+## Phase 6 — Billing & monetization (complete — awaiting green CI)
+
+All Stripe work is TEST MODE; CI runs the **mock** billing provider with
+zero secrets (D-029/D-033). Design of record: `BILLING.md`; decisions
+D-031..D-036 in `DECISIONS.md` (D-009 EE question resolved: D-031).
+
+| Step | Commit | Content |
+|---|---|---|
+| 0 | 07a7750 | EE billing audit (packages/ee = COMMERCIAL, nothing reused); BILLING.md pricing + go-live checklist; D-009 resolved (D-031..D-034) |
+| 1 | ab9c0bf | Schema migration `20260904000000_northsign_billing`: nullable Subscription extensions (provider/plan/periodStart/paymentFailedAt) + BillingUsageEvent exactly-once journal (D-032); up/down verified on a scratch Postgres |
+| 2 | 7ec2316 | BillingService seam (D-033): interface + MockBillingService (default) + StripeBillingService, `BILLING_PROVIDER`-selected, lazy Stripe client |
+| 3 | 164c5b9 | Stripe webhook handler (signature-verified, convergent upserts) at `/api/stripe/webhook` replacing the EE proxy; mock checkout completion route; BILLING.md §4.1 local dev loop (stripe CLI) |
+| 4 | f2ecbb2 | Entitlement enforcement, sender-only: send count (row-locked, exactly-once), recipients/document, templates, API (unit gates in `assertOrganisationRatesAndLimits`, token create, v1/v2 request auth) |
+| 5 | fcdf074 | tRPC billing router; public `/pricing` (EN+fr-CA, annual toggle, tax note); `/settings/billing` dashboard (plan, usage, portal, upgrade); limit + payment-failed banners; limit toasts; 96 fr-CA msgids (REVIEW-NOTES §6); D-035 |
+| 6 | 618a0c0 | Unit tests (43: entitlement math, period windows, exactly-once accounting, webhook fixtures with offline HMAC verification) + mock E2E (limit UX, mock-Pro, pricing EN/fr); CI-secrets 403 verified → operator click-path in BILLING.md §6.1 (D-036) |
+| 7 | (this commit) | Docs finalized; push + CI-green confirmation below |
+
+Test coverage (Step 6): unit suites cover the pure entitlement math, the
+period-boundary rules (downgrade clamping, paid-period windows), the
+exactly-once journal under unique-constraint races, and every handled
+webhook event including replay, unknown-price, foreign-customer, and
+other-provider guards. E2E covers the free-tier limit UX end-to-end, the
+mock upgrade path, plan persistence across sessions, and the pricing page in
+both languages. NOT yet proven: a real Stripe test-mode round-trip from CI
+(stretch goal, D-036) and the production smoke test (§8 go-live checklist).
+
+Go-live blockers are unchanged and recorded in BILLING.md §8 — nothing in
+Phase 6 blocks building, only launching (incorporation, GST/HST decision,
+Stripe verification, live keys + live webhook endpoint).

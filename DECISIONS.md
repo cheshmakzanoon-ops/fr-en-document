@@ -558,3 +558,45 @@
 - **Consequence:** entitlement states are exactly Starter/Pro/Business ×
   ACTIVE/PAST_DUE/INACTIVE; Stripe's default period-end behavior ends
   unpaid subscriptions (no custom dunning in v1). Recorded in BILLING.md.
+
+### D-035: UI surface — org-owner billing, public /pricing page, derived-usage banners
+- **Decision:** v1 billing lives at **organisation** granularity with the
+  **organisation owner** as the only billing actor (checkout, portal, and
+  the `/settings/billing` overview all gate on `ownerUserId`); a public
+  `/pricing` page (EN + fr-CA) drives sign-up or, for signed-in owners,
+  straight into checkout; limit/payment-failed signals render as a global
+  banner (`NorthSignBillingBanner`) plus send-flow toasts, all driven by the
+  same derived numbers as the server gates (`getBillingOverview` tRPC route
+  computing plan/usage/limits from the subscription row + usage journal).
+- **Why:** Phase 5.5's signup creates a personal organisation owned by the
+  user, so ownership is the simplest correct v1 authz rule; team/org billing
+  roles arrive with Phase 8 teams. Deriving UI numbers from the same
+  entitlement helpers as the enforcement path (`getEntitlement`,
+  `getDocumentsRemaining`, `hasReachedDocumentLimit`,
+  `isNearingDocumentLimit`) means the banner thresholds can never drift from
+  what the send gate actually enforces. The upstream EE-claim billing UI
+  (table of claims, EE portal) is replaced on owned orgs and suppressed for
+  NorthSign-managed rows, since the EE portal route 500s on them.
+- **Consequence:** non-owner members see the banner but cannot open
+  checkout/portal (404 from the tRPC guard); the pricing page is fully
+  public and locale-aware; `formatCadPrice` renders CAD locale-correctly
+  (fr-CA: « 19 $ »); 96 new msgids entered the catalogs translated (REVIEW-
+  NOTES §6) pending the Phase 9 human polish pass.
+
+### D-036: CI Stripe secrets are operator-added — managed credential cannot write Actions secrets
+- **Decision:** CI remains on the mock provider with **zero** Stripe
+  secrets (D-029/D-033). Adding optional test-mode secrets
+  (`STRIPE_TEST_SECRET_KEY`, `STRIPE_TEST_WEBHOOK_SECRET`) for a future
+  real-Stripe E2E is an operator task via the GitHub UI click-path recorded
+  in BILLING.md §6.1 — the Freebuff-managed GitHub App token was verified
+  (Phase 6 Step 6) to lack the Actions-secrets permission (403 on GET and
+  PUT of `repos/…/actions/secrets`), so no API path exists from this
+  workspace.
+- **Why:** the managed credential is deliberately scoped; widening it is a
+  workspace-security decision, not a phase task, and nothing in the phase
+  requires real Stripe in CI (real test-mode E2E is an explicit stretch
+  goal).
+- **Consequence:** stretch-goal test-mode E2E waits for the operator to add
+  the two secrets; until then the E2E suite proves the billing UX on mock,
+  and the Stripe provider is proven by offline unit tests with fixture
+  payloads and locally computed HMAC signatures.
