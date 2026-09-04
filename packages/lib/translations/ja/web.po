@@ -301,6 +301,11 @@ msgstr "{0}"
 msgid "{0} direct signing templates"
 msgstr "{0} のダイレクト署名テンプレート"
 
+#. placeholder {0}: definition.documentsPerPeriod
+#: apps/remix/app/routes/pricing.tsx
+msgid "{0} documents sent per month"
+msgstr ""
+
 #. placeholder {0}: t(FRIENDLY_FIELD_TYPE[field.type])
 #: packages/ui/components/document/envelope-recipient-field-tooltip.tsx
 msgid "{0} field"
@@ -341,6 +346,11 @@ msgstr "{0} が「{1}」を代表してドキュメント「{2}」の{recipientA
 #. placeholder {0}: planClaim.name
 #: apps/remix/app/components/general/settings-org-switcher.tsx
 msgid "{0} Plan"
+msgstr ""
+
+#. placeholder {0}: definition.recipientsPerDocument
+#: apps/remix/app/routes/pricing.tsx
+msgid "{0} recipients per document"
 msgstr ""
 
 #. placeholder {0}: formatChipCount(totalVisibleCount, isVisibleCountCapped)
@@ -518,6 +528,10 @@ msgstr "{remaningLength, plural, other {# 文字残り}}"
 #: apps/remix/app/components/tables/envelopes-table-bulk-action-bar.tsx
 msgid "{selectedCount} selected"
 msgstr "{selectedCount} 件選択済み"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "{sentCount} of {periodLimit} documents sent"
+msgstr ""
 
 #: packages/email/template-components/template-document-rejected.tsx
 msgid "{signerName} has rejected the document \"{documentName}\"."
@@ -735,6 +749,15 @@ msgstr "{validationLength, plural, other {ちょうど # 個のオプション�
 msgid "{visibleRows, plural, one {Showing # result.} other {Showing # results.}}"
 msgstr "{visibleRows, plural, other {# 件の結果を表示中}}"
 
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "/month"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "/year"
+msgstr ""
+
 #: apps/remix/app/components/general/filter-pill.tsx
 msgid "+{extraCount} more"
 msgstr ""
@@ -907,6 +930,10 @@ msgstr "<0>タイプ入力</0> - キーボードで入力された署名です�
 msgid "<0>Uploaded</0> - A signature that is uploaded from a file."
 msgstr "<0>アップロード</0> - ファイルからアップロードされた署名です。"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "$0"
+msgstr ""
+
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 msgid "0 Free organisations left"
 msgstr "無料の組織枠は残り 0 件です"
@@ -923,6 +950,10 @@ msgstr "1 か月"
 msgid "12 months"
 msgstr "12 か月"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "2"
+msgstr ""
+
 #: apps/remix/app/components/general/document-signing/document-signing-auth-dialog.tsx
 msgid "2FA"
 msgstr "2FA"
@@ -934,6 +965,10 @@ msgstr "2FA リセット"
 #: apps/remix/app/components/general/document-signing/document-signing-auth-2fa.tsx
 msgid "2FA token"
 msgstr "2要素認証トークン"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "3"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/token-create-dialog.tsx
 msgid "3 months"
@@ -1297,6 +1332,7 @@ msgstr "操作"
 msgid "Actions"
 msgstr "操作"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
 #: apps/remix/app/components/tables/organisation-email-domains-table.tsx
 #: apps/remix/app/routes/_authenticated+/admin+/email-domains._index.tsx
 #: apps/remix/app/routes/_authenticated+/admin+/email-domains._index.tsx
@@ -2077,6 +2113,10 @@ msgstr "ページレイアウトを分析しています"
 msgid "Analyzing pages"
 msgstr "ページを分析しています"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Annual"
+msgstr ""
+
 #: apps/remix/app/routes/_authenticated+/inbox.tsx
 msgid "Any documents that you have been invited to will appear here"
 msgstr "あなた宛てに招待されたドキュメントがここに表示されます"
@@ -2093,6 +2133,11 @@ msgstr "すべてのステータス"
 #: apps/remix/app/components/tables/admin-organisation-stats-table.tsx
 msgid "API"
 msgstr "API"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "API access"
+msgstr ""
 
 #: apps/remix/app/components/forms/email-transport-form.tsx
 #: apps/remix/app/components/forms/email-transport-form.tsx
@@ -2429,6 +2474,14 @@ msgstr "ベースのテキストカラー。"
 msgid "Before you get started, please confirm your email address by clicking the button below:"
 msgstr "開始する前に、下のボタンをクリックしてメールアドレスを確認してください。"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Billed monthly."
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Billed yearly."
+msgstr ""
+
 #: apps/remix/app/components/general/org-menu-switcher.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.billing.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.billing.tsx
@@ -2438,6 +2491,14 @@ msgstr "開始する前に、下のボタンをクリックしてメールアド
 #: packages/lib/utils/settings-nav.ts
 msgid "Billing"
 msgstr "請求"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Billing is managed per organisation. Create an organisation to get started, or contact support if you believe this is a mistake."
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Billing portal is simulated"
+msgstr ""
 
 #: apps/remix/app/components/forms/public-profile-form.tsx
 msgid "Bio"
@@ -2580,6 +2641,15 @@ msgstr "CSV でテンプレートを一括送信"
 msgid "Bulk Send via CSV"
 msgstr "CSV で一括送信"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "Business"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Business includes team features, which ship in a later release. Business accounts keep today's price until then."
+msgstr ""
+
 #: packages/email/templates/organisation-invite.tsx
 msgid "by <0>{senderName}</0>"
 msgstr "送信者: <0>{senderName}</0>"
@@ -2625,6 +2695,7 @@ msgstr "準備ができる"
 msgid "Can't find someone?"
 msgstr "メンバーが見つかりませんか？"
 
+#: apps/remix/app/routes/pricing.tsx
 #: apps/remix/app/utils/meta.ts
 msgid "Canadian-hosted e-signatures"
 msgstr ""
@@ -2766,6 +2837,10 @@ msgstr "取り消し済み"
 msgid "Cancelled by user"
 msgstr "ユーザーによりキャンセルされました"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Cancels at period end"
+msgstr ""
+
 #: apps/remix/app/components/embed/authoring/configure-document-upload.tsx
 msgid "Cannot remove document"
 msgstr "ドキュメントを削除できません"
@@ -2882,6 +2957,14 @@ msgstr "チェックボックスの値"
 msgid "Checkout"
 msgstr "チェックアウト"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Checkout cancelled"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Checkout complete"
+msgstr ""
+
 #: packages/lib/constants/i18n.ts
 msgid "Chinese"
 msgstr "中国語"
@@ -2889,6 +2972,10 @@ msgstr "中国語"
 #: apps/remix/app/components/dialogs/template-direct-link-dialog.tsx
 msgid "Choose an existing recipient from below to continue"
 msgstr "続行するには、下から既存の受信者を選択してください"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Choose Business"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/template-direct-link-dialog.tsx
 msgid "Choose Direct Link Recipient"
@@ -2901,6 +2988,10 @@ msgstr "文書をどのように受信者へ届けるかを選択します"
 #: apps/remix/app/components/embed/authoring/configure-document-advanced-settings.tsx
 msgid "Choose how to distribute your document to recipients. Email will send notifications, None will generate signing links for manual distribution."
 msgstr "ドキュメントを受信者にどのように配布するかを選択します。メールは通知を送信し、「なし」は手動配布用の署名リンクを生成します。"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Choose Pro"
+msgstr ""
 
 #: apps/remix/app/components/general/document-signing/access-auth-2fa-form.tsx
 msgid "Choose verification method"
@@ -3029,6 +3120,14 @@ msgstr "サインアップをブロックするメールドメインをカンマ
 msgid "Communication"
 msgstr "コミュニケーション"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Community"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Community support"
+msgstr ""
+
 #: apps/remix/app/components/general/settings-upsell/branding-upsell.tsx
 msgid "Company details"
 msgstr ""
@@ -3040,6 +3139,14 @@ msgstr ""
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 msgid "Compare all plans and features in detail"
 msgstr "すべてのプランと機能を詳細に比較"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Compare plans"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Compare plans and annual pricing"
+msgstr ""
 
 #: apps/remix/app/components/embed/embed-direct-template-client-page.tsx
 #: apps/remix/app/components/embed/embed-direct-template-client-page.tsx
@@ -3720,6 +3827,16 @@ msgstr "現在のパスワード"
 #: apps/remix/app/components/forms/password.tsx
 msgid "Current password is incorrect."
 msgstr "現在のパスワードが正しくありません。"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Current period ends {periodEndDate}."
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "Current plan"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/template-bulk-send-dialog.tsx
 msgid "Current recipients:"
@@ -4833,6 +4950,10 @@ msgstr ""
 #: apps/remix/app/routes/_authenticated+/admin+/stats.tsx
 msgid "Documents Received"
 msgstr "受信した文書"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Documents sent per month"
+msgstr ""
 
 #: apps/remix/app/components/tables/inbox-table.tsx
 msgid "Documents that require your attention will appear here"
@@ -5982,6 +6103,10 @@ msgstr "失敗: {failedCount}"
 msgid "Fair use limit exceeded"
 msgstr "フェアユースの上限を超えました"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Feature"
+msgstr ""
+
 #: apps/remix/app/components/forms/subscription-claim-form.tsx
 #: apps/remix/app/components/tables/admin-claims-table.tsx
 #: apps/remix/app/routes/_authenticated+/admin+/organisations.$id.tsx
@@ -6140,6 +6265,18 @@ msgstr "各受信者ごとに、メールアドレス（必須）と名前（任
 msgid "For example, if the claim has a new flag \"FLAG_1\" set to true, then this organisation will get that flag added."
 msgstr "たとえば、クレームに新しいフラグ「FLAG_1」が true で設定されている場合、この組織にもそのフラグが追加されます。"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "For occasional signing and trying NorthSign."
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "For professionals who send documents every day."
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "For teams that need priority support and shared workflows."
+msgstr ""
+
 #: apps/remix/app/components/forms/branding-preferences-form.tsx
 msgid "Foreground"
 msgstr "前景色"
@@ -6162,6 +6299,10 @@ msgstr "パスワードをお忘れですか？"
 msgid "Forgot your password?"
 msgstr "パスワードをお忘れですか？"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Free"
+msgstr ""
+
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 msgctxt "Plan price"
 msgid "Free"
@@ -6177,6 +6318,14 @@ msgstr "無料"
 msgctxt "Subscription status"
 msgid "Free (Pending)"
 msgstr "無料（保留中）"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Free forever. No credit card required."
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Free plan"
+msgstr ""
 
 #: packages/lib/utils/fields.ts
 #: packages/ui/primitives/document-flow/types.ts
@@ -6202,6 +6351,10 @@ msgstr "送信元アドレス"
 #: apps/remix/app/components/forms/email-transport-form.tsx
 msgid "From name"
 msgstr "送信元名"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Full API access"
+msgstr ""
 
 #: apps/remix/app/components/embed/embed-direct-template-client-page.tsx
 #: apps/remix/app/components/embed/embed-document-signing-page-v1.tsx
@@ -6244,6 +6397,10 @@ msgstr "リンクを生成"
 #: packages/lib/constants/i18n.ts
 msgid "German"
 msgstr "ドイツ語"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Get started free"
+msgstr ""
 
 #: apps/remix/app/components/general/settings-upsell/sso-portal-upsell.tsx
 msgid "Give your members a dedicated single sign-on portal. The SSO portal is available on the Enterprise plan."
@@ -6666,6 +6823,19 @@ msgstr "監査ログをドキュメントに含める"
 msgid "Include the Signing Certificate in the Document"
 msgstr "署名証明書をドキュメントに含める"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "Included"
+msgstr ""
+
 #: apps/remix/app/components/general/billing-plans.tsx
 msgid "Includes:"
 msgstr "含まれる内容："
@@ -6851,6 +7021,10 @@ msgstr "招待日時"
 #: apps/remix/app/components/tables/organisation-billing-invoices-table.tsx
 msgid "Invoice"
 msgstr "請求書"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Invoices and payment methods live in the billing portal."
+msgstr ""
 
 #: apps/remix/app/components/tables/admin-document-logs-table.tsx
 #: apps/remix/app/components/tables/document-logs-table.tsx
@@ -7255,6 +7429,7 @@ msgstr "すべてのサブスクリプションクレームを管理"
 msgid "Manage and view template"
 msgstr "テンプレートを管理・閲覧"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-portal-button.tsx
 msgid "Manage billing"
 msgstr "請求を管理"
@@ -7264,10 +7439,6 @@ msgstr "請求を管理"
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
 msgid "Manage Billing"
 msgstr "請求を管理"
-
-#: apps/remix/app/routes/_authenticated+/settings+/billing.tsx
-msgid "Manage billing and subscriptions for organisations where you have billing management permissions."
-msgstr "請求管理の権限を持つ組織について、請求およびサブスクリプションを管理します。"
 
 #: apps/remix/app/components/dialogs/public-profile-template-manage-dialog.tsx
 msgid "Manage details for this public template"
@@ -7355,6 +7526,10 @@ msgstr "チームメンバーを管理します。"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.members.tsx
 msgid "Manage the members or invite new members."
 msgstr "メンバーを管理したり、新しいメンバーを招待したりできます。"
+
+#: apps/remix/app/routes/_authenticated+/settings+/billing.tsx
+msgid "Manage the plan, usage, payment method and invoices for the organisations you own. Prices are in CAD and exclude GST/HST/QST, which are calculated at checkout."
+msgstr ""
 
 #: apps/remix/app/components/dialogs/folder-update-dialog.tsx
 msgid "Manage the settings for this folder."
@@ -7549,6 +7724,7 @@ msgstr "サブスクリプションクレームの詳細を変更します。"
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 #: apps/remix/app/components/general/billing-plans.tsx
+#: apps/remix/app/routes/pricing.tsx
 msgid "Monthly"
 msgstr "月額"
 
@@ -7564,8 +7740,16 @@ msgstr "月間アクティブユーザー：1 つ以上の文書が完了した�
 msgid "Monthly quota"
 msgstr ""
 
+#: apps/remix/app/utils/toast-error-messages.ts
+msgid "Monthly sending limit reached"
+msgstr ""
+
 #: apps/remix/app/components/general/organisation-usage-panel.tsx
 msgid "Monthly usage"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Most popular"
 msgstr ""
 
 #: apps/remix/app/components/dialogs/envelopes-bulk-move-dialog.tsx
@@ -7756,6 +7940,14 @@ msgstr "いいえ"
 msgid "No active drafts"
 msgstr "有効な下書きはありません"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "No billing organisations found"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "No changes were made to your plan. You can upgrade whenever you are ready."
+msgstr ""
+
 #: apps/remix/app/components/general/pdf-viewer/envelope-pdf-viewer.tsx
 #: apps/remix/app/components/general/pdf-viewer/pdf-viewer.tsx
 msgid "No document found"
@@ -7811,6 +8003,10 @@ msgstr "「{searchTerm}」に一致するフォルダが見つかりません"
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates.folders._index.tsx
 msgid "No folders yet."
 msgstr "まだフォルダーがありません。"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "No free trials, no hidden fees. Documents are stored in Canada (AWS ca-central-1)."
+msgstr ""
 
 #: apps/remix/app/components/embed/embed-document-rejected.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/rejected.tsx
@@ -7973,6 +8169,14 @@ msgstr "なし"
 msgid "None (Overrides global settings)"
 msgstr "なし（グローバル設定を上書き）"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "NorthSign home"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "NorthSign is running with the test billing provider, so there is no real Stripe portal. In production this button opens your payment method, invoices, and plan changes."
+msgstr ""
+
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.edit.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates.$id._index.tsx
@@ -7982,6 +8186,11 @@ msgstr "見つかりません"
 #: apps/remix/app/routes/embed+/_v0+/_layout.tsx
 msgid "Not Found"
 msgstr "見つかりません"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Not included"
+msgstr ""
 
 #: apps/remix/app/components/general/admin-global-settings-section.tsx
 msgid "Not set"
@@ -8119,6 +8328,10 @@ msgstr "問題が発生しました。"
 
 #: apps/remix/app/components/general/app-command-menu.tsx
 msgid "Open"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Open app"
 msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl._index.tsx
@@ -8508,6 +8721,14 @@ msgctxt "Subscription status"
 msgid "Past Due"
 msgstr "支払い遅延"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Payment failed"
+msgstr ""
+
+#: apps/remix/app/components/general/organisations/northsign-billing-banner.tsx
+msgid "Payment failed — update your payment method to keep your plan active."
+msgstr ""
+
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 msgid "Payment overdue"
@@ -8580,6 +8801,14 @@ msgstr "月額"
 #: apps/remix/app/components/general/billing-plans.tsx
 msgid "per year"
 msgstr "年額"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Per-recipient English and French signing"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Per-recipient locale (EN / fr-CA signing emails)"
+msgstr ""
 
 #: apps/remix/app/components/tables/admin-organisation-stats-table.tsx
 #: apps/remix/app/components/tables/documents-table-period-filter.tsx
@@ -8927,6 +9156,14 @@ msgstr "送信前に文書をプレビューします"
 msgid "Preview what the signed document will look like with placeholder data"
 msgstr "プレースホルダーデータを使用して、署名後の文書の見た目をプレビューします"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Prices in CAD, exclusive of GST/HST/QST. Taxes are calculated at checkout."
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Pricing"
+msgstr ""
+
 #: apps/remix/app/components/forms/branding-preferences-form.tsx
 msgid "Primary"
 msgstr "プライマリ"
@@ -8938,6 +9175,14 @@ msgstr "主要なアクションの色。"
 #: apps/remix/app/components/forms/branding-preferences-form.tsx
 msgid "Primary Foreground"
 msgstr "プライマリ前景色"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Priority"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Priority email support"
+msgstr ""
 
 #: apps/remix/app/routes/privacy.tsx
 msgid "Privacy Policy"
@@ -8960,6 +9205,11 @@ msgstr "非公開テンプレート"
 #: apps/remix/app/components/tables/templates-table.tsx
 msgid "Private templates can only be modified and viewed by you."
 msgstr "非公開テンプレートは、あなたのみが閲覧・編集できます。"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "Pro"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/assistant-confirmation-dialog.tsx
 msgid "Proceed"
@@ -9099,6 +9349,10 @@ msgstr "ドキュメントを読み込んでいます"
 #: apps/remix/app/components/general/document/document-page-view-recipients.tsx
 msgid "Ready"
 msgstr "準備完了"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Ready to send your first bilingual document?"
+msgstr ""
 
 #: apps/remix/app/routes/_internal+/[__htmltopdf]+/certificate.tsx
 #: packages/lib/server-only/pdf/render-certificate.ts
@@ -9297,6 +9551,11 @@ msgstr ""
 #: apps/remix/app/routes/_authenticated+/admin+/stats.tsx
 msgid "Recipients metrics"
 msgstr "受信者は文書のコピーを保持したままです"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "Recipients per document"
+msgstr ""
 
 #: apps/remix/app/components/forms/document-preferences-form.tsx
 msgid "Recipients that will be automatically added to new documents."
@@ -9542,6 +9801,10 @@ msgstr "ドキュメント名を変更"
 msgid "Rename Template"
 msgstr "テンプレート名を変更"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Renews {periodEndDate}."
+msgstr ""
+
 #: apps/remix/app/components/forms/password.tsx
 #: apps/remix/app/components/forms/reset-password.tsx
 msgid "Repeat Password"
@@ -9703,6 +9966,10 @@ msgstr ""
 #: apps/remix/app/components/dialogs/admin-user-reset-two-factor-dialog.tsx
 msgid "Reset Two Factor Authentication"
 msgstr "二要素認証をリセット"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Resets at the start of each calendar month."
+msgstr ""
 
 #: apps/remix/app/components/forms/reset-password.tsx
 msgid "Resetting Password..."
@@ -10516,6 +10783,10 @@ msgstr "署名フィールド"
 msgid "Sign Here"
 msgstr "ここに署名"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Sign in"
+msgstr ""
+
 #: apps/remix/app/components/forms/signin.tsx
 #: apps/remix/app/components/forms/signin.tsx
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
@@ -10553,6 +10824,10 @@ msgstr "サインアップ"
 #: apps/remix/app/routes/_unauthenticated+/signup.tsx
 msgid "Sign Up"
 msgstr "登録する"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Sign up free and send 3 documents a month, with up to 2 recipients each — per-recipient English and French signing included on every plan."
+msgstr ""
 
 #: apps/remix/app/components/forms/signup.tsx
 msgid "Sign Up with Google"
@@ -10759,6 +11034,10 @@ msgstr "{0} の署名期間が終了しました"
 msgid "Signup is currently disabled or not available for your email domain."
 msgstr "サインアップは現在無効になっているか、お使いのメールドメインでは利用できません。"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Simple, transparent pricing for signing in Canada"
+msgstr ""
+
 #. placeholder {0}: DateTime.fromJSDate(publicProfile.badge.since).toFormat('LLL ‘yy')
 #: apps/remix/app/routes/_profile+/p.$url.tsx
 msgid "Since {0}"
@@ -10821,6 +11100,8 @@ msgstr "一部の署名者に署名フィールドが割り当てられていま
 #: apps/remix/app/components/general/document-signing/document-signing-auth-page.tsx
 #: apps/remix/app/components/general/document/document-audit-log-download-button.tsx
 #: apps/remix/app/components/general/document/document-certificate-download-button.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-portal-button.tsx
 #: apps/remix/app/components/general/organisations/organisation-invitations.tsx
@@ -10954,6 +11235,27 @@ msgstr "スペイン語"
 msgid "SSO"
 msgstr "SSO"
 
+#: apps/remix/app/routes/pricing.tsx
+msgid "Standard"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Standard email support"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Start for free"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Start free — no credit card, no trial clock. Upgrade when your team needs unlimited sends, templates, or the API."
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+#: apps/remix/app/routes/pricing.tsx
+msgid "Starter"
+msgstr ""
+
 #: apps/remix/app/routes/_authenticated+/admin+/_layout.tsx
 msgid "Stats"
 msgstr "統計"
@@ -11054,6 +11356,10 @@ msgstr "サブスクリプションクレームは正常に更新されました
 #: apps/remix/app/routes/_authenticated+/admin+/claims.tsx
 msgid "Subscription Claims"
 msgstr "サブスクリプションクレーム"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Subscription ends {periodEndDate}."
+msgstr ""
 
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 msgid "Subscription invalid"
@@ -11160,6 +11466,7 @@ msgstr "サポート"
 #: apps/remix/app/components/general/org-menu-switcher.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
+#: apps/remix/app/routes/pricing.tsx
 msgid "Support"
 msgstr "サポート"
 
@@ -11208,6 +11515,10 @@ msgstr "システム要件"
 #: apps/remix/app/components/general/app-command-menu.tsx
 msgid "System Theme"
 msgstr "システムテーマ"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Talk to us"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/admin-swap-subscription-dialog.tsx
 msgid "Target Organisation"
@@ -11288,6 +11599,14 @@ msgstr "チームのメールアドレスが認証されました！"
 #: apps/remix/app/components/dialogs/team-email-update-dialog.tsx
 msgid "Team email was updated."
 msgstr "チームのメールアドレスを更新しました。"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Team features"
+msgstr ""
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Team features with shared workflows"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings.groups.tsx
 msgid "Team Groups"
@@ -11494,11 +11813,13 @@ msgstr "テンプレートをアップロードしました"
 #: apps/remix/app/components/general/app-command-menu.tsx
 #: apps/remix/app/components/general/app-nav-desktop.tsx
 #: apps/remix/app/components/general/app-nav-mobile.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings.public-profile.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates.$id._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates.folders._index.tsx
+#: apps/remix/app/routes/pricing.tsx
 msgid "Templates"
 msgstr "テンプレート"
 
@@ -11509,6 +11830,10 @@ msgstr "テンプレートを削除しました"
 #: apps/remix/app/components/dialogs/envelopes-bulk-delete-dialog.tsx
 msgid "Templates partially deleted"
 msgstr "一部のテンプレートを削除しました"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Templates to send in one click"
+msgstr ""
 
 #: apps/remix/app/routes/terms.tsx
 msgid "Terms of Service"
@@ -11529,6 +11854,10 @@ msgstr "テストメールを送信しました。"
 #: apps/remix/app/components/dialogs/email-transport-send-test-dialog.tsx
 msgid "Test failed."
 msgstr "テストに失敗しました。"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Test mode"
+msgstr ""
 
 #: apps/remix/app/components/dialogs/webhook-test-dialog.tsx
 msgid "Test Webhook"
@@ -12293,6 +12622,10 @@ msgstr "このメールは、他に未署名の受信者がいる場合、ドキ
 msgid "This envelope cannot have more than {recipientCountLimit} recipients. Please contact support if you need more."
 msgstr "この封筒に追加できる受信者は {recipientCountLimit} 人までです。さらに必要な場合はサポートまでお問い合わせください。"
 
+#: apps/remix/app/utils/toast-error-messages.ts
+msgid "This feature is included with Pro and above. Upgrade from Settings → Billing to unlock it."
+msgstr ""
+
 #: apps/remix/app/components/embed/embed-paywall.tsx
 msgid "This feature is not available on your current plan"
 msgstr "この機能は現在ご利用中のプランではご利用いただけません"
@@ -12942,14 +13275,31 @@ msgid "Unknown name"
 msgstr "不明な名前"
 
 #: apps/remix/app/components/general/claim-limit-fields.tsx
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
 #: apps/remix/app/components/general/organisation-usage-panel.tsx
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
+#: apps/remix/app/routes/pricing.tsx
 msgid "Unlimited"
 msgstr "無制限"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Unlimited documents sent"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Unlimited documents sent."
+msgstr ""
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
 msgid "Unlimited documents, API and more"
 msgstr "ドキュメント無制限、API など"
+
+#: apps/remix/app/routes/pricing.tsx
+msgid "Unlimited recipients per document"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/settings+/security.linked-accounts.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.linked-accounts.tsx
@@ -13063,6 +13413,10 @@ msgstr "パスキーを更新"
 msgid "Update password"
 msgstr "パスワードを更新"
 
+#: apps/remix/app/components/general/organisations/northsign-billing-banner.tsx
+msgid "Update payment method"
+msgstr ""
+
 #: apps/remix/app/components/forms/profile.tsx
 msgid "Update profile"
 msgstr "プロフィールを更新"
@@ -13155,6 +13509,18 @@ msgstr "<0>{0}</0> を {planName} にアップグレード"
 
 #: apps/remix/app/components/general/settings-upsell/settings-upsell-card.tsx
 msgid "Upgrade Plan"
+msgstr ""
+
+#: apps/remix/app/utils/toast-error-messages.ts
+msgid "Upgrade required"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Upgrade to Pro — {proMonthlyPrice}/month"
+msgstr ""
+
+#: apps/remix/app/components/general/organisations/northsign-billing-banner.tsx
+msgid "Upgrade to send more"
 msgstr ""
 
 #: apps/remix/app/components/general/envelope/envelope-drop-zone-wrapper.tsx
@@ -13267,6 +13633,10 @@ msgstr "アップロード中"
 #: apps/remix/app/components/general/document/embedded-editor-attachment-popover.tsx
 msgid "URL"
 msgstr "URL"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Usage this period"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/templates.$id._index.tsx
 msgid "Use"
@@ -13702,6 +14072,10 @@ msgstr "現在、このパスキーは削除できません。後でもう一度
 msgid "We are unable to update this passkey at the moment. Please try again later."
 msgstr "現在、このパスキーは更新できません。後でもう一度お試しください。"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "We could not charge your payment method. Your access continues until the end of the billing period, then the plan is paused. Update your payment method to avoid an interruption."
+msgstr ""
+
 #: apps/remix/app/components/general/app-command-menu.tsx
 msgid "We couldn’t complete the search. Try again."
 msgstr ""
@@ -13969,6 +14343,10 @@ msgstr "二要素認証を無効にできませんでした。パスワードと
 msgid "We were unable to log you out at this time."
 msgstr "現在、ログアウトできませんでした。"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "We were unable to open the billing portal. Please try again, or contact support."
+msgstr ""
+
 #: apps/remix/app/routes/_recipient+/report.$token.tsx
 msgid "We were unable to report this sender at this time. Please try again later."
 msgstr "現在この送信者を報告できませんでした。時間をおいてからもう一度お試しください。"
@@ -13981,6 +14359,10 @@ msgstr "公開プロフィールを公開状態に変更できませんでした
 #: apps/remix/app/components/forms/2fa/enable-authenticator-app-dialog.tsx
 msgid "We were unable to setup two-factor authentication for your account. Please ensure that you have entered your code correctly and try again."
 msgstr "二要素認証を設定できませんでした。コードが正しく入力されているか確認のうえ、再度お試しください。"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "We were unable to start the checkout. Please try again, or contact support."
+msgstr ""
 
 #: apps/remix/app/utils/toast-error-messages.ts
 #: apps/remix/app/utils/toast-error-messages.ts
@@ -14164,6 +14546,10 @@ msgstr ""
 #: packages/email/template-components/template-admin-user-created.tsx
 #: packages/email/template-components/template-confirmation-email.tsx
 msgid "Welcome to NorthSign!"
+msgstr ""
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Welcome to your new plan"
 msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
@@ -14640,6 +15026,10 @@ msgstr "今後、このドキュメントに署名する必要はありません
 msgid "You failed to validate a 2FA token for the document"
 msgstr "文書用の2要素認証トークンを検証できませんでした"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "You have 1 document left this period."
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.invite.$token.tsx
 msgid "You have accepted an invitation from <0>{organisationName}</0> to join their organisation."
 msgstr ""
@@ -14700,6 +15090,10 @@ msgstr "まだテンプレートを作成していません。テンプレート
 msgid "You have not yet created or received any documents. To create a document please upload one."
 msgstr "まだ文書を作成または受信していません。文書を作成するには、文書をアップロードしてください。"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "You have reached the {periodLimit} documents per month limit."
+msgstr ""
+
 #: apps/remix/app/utils/toast-error-messages.ts
 msgid "You have reached the limit of the number of files per envelope."
 msgstr "1つの封筒にアップロードできるファイル数の上限に達しました。"
@@ -14739,6 +15133,10 @@ msgstr "ドキュメント '{documentName}' を却下しました"
 #: apps/remix/app/routes/_recipient+/sign.$token+/rejected.tsx
 msgid "You have rejected this document"
 msgstr "このドキュメントを却下しました。"
+
+#: apps/remix/app/utils/toast-error-messages.ts
+msgid "You have sent all the documents included in the free Starter plan this month. Upgrade to Pro for unlimited sending — your recipients are never blocked."
+msgstr ""
 
 #: packages/email/template-components/template-document-self-signed.tsx
 msgid "You have signed “{documentName}”"
@@ -14804,6 +15202,14 @@ msgstr "{organisationMemberName} を更新しました。"
 #: apps/remix/app/components/dialogs/team-group-update-dialog.tsx
 msgid "You have updated the team group."
 msgstr "チームグループを更新しました。"
+
+#: apps/remix/app/components/general/organisations/northsign-billing-banner.tsx
+msgid "You have used {used} of {limit} free documents this month."
+msgstr ""
+
+#: apps/remix/app/components/general/organisations/northsign-billing-banner.tsx
+msgid "You have used all {limit} free documents this month."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "You have verified your email address for <0>{teamName}</0>."
@@ -15346,6 +15752,10 @@ msgstr "お支払いが滞っています。サービス停止を防ぐために
 msgid "Your plan does not support inviting members. Please upgrade or your plan or contact sales at <0>{SUPPORT_EMAIL}</0> if you would like to discuss your options."
 msgstr "現在のプランではメンバーの招待はサポートされていません。プランのアップグレード、またはご相談をご希望の場合は <0>{SUPPORT_EMAIL}</0> まで営業担当へお問い合わせください。"
 
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Your plan has been updated. You can start sending without limits right away."
+msgstr ""
+
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 msgid "Your plan is no longer valid. Please subscribe to a new plan to continue using {APP_NAME}."
 msgstr ""
@@ -15407,6 +15817,10 @@ msgstr "ご利用の署名プロバイダーは、このアカウントで使用
 #: apps/remix/app/components/embed/embed-recipient-expired.tsx
 msgid "Your signing window for this document has expired. Please contact the sender for a new invitation."
 msgstr "この文書に対するあなたの署名期間は終了しました。新しい招待が必要な場合は、送信者に連絡してください。"
+
+#: apps/remix/app/components/general/northsign-billing-dashboard.tsx
+msgid "Your subscription is being activated — this usually takes a few seconds."
+msgstr ""
 
 #: apps/remix/app/components/forms/support-ticket-form.tsx
 msgid "Your support request has been submitted. We'll get back to you soon!"

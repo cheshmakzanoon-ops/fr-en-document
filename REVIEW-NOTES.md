@@ -478,3 +478,101 @@ Applied deterministically (see `fr-ca-tools.mjs` + this session's fixes):
 - [ ] Re-run glossary greps: `e-mail|email` in fr msgstrs = 0;
       `Journal d'audit` = 0; `Importer` (upload context) = 0
 - [ ] Marketing/landing copy ships ONLY after this pass (Phase 9)
+
+---
+
+## 6. Phase 6 — billing & monetization msgids (Steps 5, logged 2026-09-04)
+
+All 96 new msgids introduced by the billing surfaces were translated to fr-CA
+this session and verified: catalog missing = 0 after extraction, `lingui
+compile` green. Provenance: machine-translated by the session agent using the
+I18N.md §7 glossary (courriel, téléverser, formal « vous », NBSP elisions with
+typographic apostrophes « ' »), following the established fr-CA conventions
+above. They carry the SAME "human polish required" flag as §2 — add them to
+the Phase 9 polish-pass backlog (especially: « Forfait » vs « Plan » usage,
+« Le plus populaire » badge width in the pricing cards, and the long
+payment-failed banner copy).
+
+New surfaces (msgid sources):
+- `apps/remix/app/routes/pricing.tsx` (public /pricing page)
+- `apps/remix/app/components/general/northsign-billing-dashboard.tsx`
+  (/settings/billing cards: plan, usage, portal, upgrade CTAs)
+- `apps/remix/app/components/general/organisations/northsign-billing-banner.tsx`
+  (limit + payment-failed banners)
+- `apps/remix/app/utils/toast-error-messages.ts` (limit-reached toasts)
+- `apps/remix/app/routes/_authenticated+/settings+/billing.tsx` (subtitle)
+
+Full msgid list (en source, as extracted):
+
+```text
+- "{0} documents sent per month"
+- "{0} recipients per document"
+- "{sentCount} of {periodLimit} documents sent"
+- "/month" · "/year" · "$0" · "2" · "3"
+- "Annual" · "Monthly" (pre-existing)
+- "API access"
+- "Billed monthly." · "Billed yearly."
+- "Billing is managed per organisation. Create an organisation to get started, or contact support if you believe this is a mistake."
+- "Billing portal is simulated"
+- "Business" · "Pro" · "Starter" (brand tier names — kept untranslated in msgstrs)
+- "Business includes team features, which ship in a later release. Business accounts keep today's price until then."
+- "Cancels at period end" · "Active" (pre-existing)
+- "Checkout cancelled" · "Checkout complete"
+- "Choose Business" · "Choose Pro"
+- "Community" · "Standard" · "Priority"
+- "Community support" · "Standard email support" · "Priority email support"
+- "Compare plans" · "Compare plans and annual pricing" · "Feature"
+- "Current period ends {periodEndDate}." · "Renews {periodEndDate}." · "Subscription ends {periodEndDate}."
+- "Current plan" · "Free" · "Free plan" · "Test mode"
+- "Documents sent per month" · "Recipients per document" · "Team features"
+- "For occasional signing and trying NorthSign."
+- "For professionals who send documents every day."
+- "For teams that need priority support and shared workflows."
+- "Free forever. No credit card required."
+- "Full API access" · "Templates to send in one click" · "Team features with shared workflows"
+- "Get started free" · "Start for free" · "Sign in" · "Open app" · "Talk to us"
+- "Included" · "Not included" · "Unlimited"
+- "Invoices and payment methods live in the billing portal."
+- "Manage the plan, usage, payment method and invoices for the organisations you own. Prices are in CAD and exclude GST/HST/QST, which are calculated at checkout."
+- "Monthly sending limit reached" · "Upgrade required" · "Upgrade to send more"
+- "Most popular" · "Current plan"
+- "No billing organisations found"
+- "No changes were made to your plan. You can upgrade whenever you are ready."
+- "No free trials, no hidden fees. Documents are stored in Canada (AWS ca-central-1)."
+- "NorthSign home"
+- "NorthSign is running with the test billing provider, so there is no real Stripe portal. In production this button opens your payment method, invoices, and plan changes."
+- "Payment failed" · "Payment failed — update your payment method to keep your plan active." · "Update payment method"
+- "Per-recipient English and French signing" · "Per-recipient locale (EN / fr-CA signing emails)"
+- "Prices in CAD, exclusive of GST/HST/QST. Taxes are calculated at checkout."
+- "Pricing"
+- "Ready to send your first bilingual document?"
+- "Resets at the start of each calendar month."
+- "Sign up free and send 3 documents a month, with up to 2 recipients each — per-recipient English and French signing included on every plan."
+- "Simple, transparent pricing for signing in Canada"
+- "Start free — no credit card, no trial clock. Upgrade when your team needs unlimited sends, templates, or the API."
+- "This feature is included with Pro and above. Upgrade from Settings → Billing to unlock it."
+- "Unlimited documents sent" · "Unlimited documents sent." · "Unlimited recipients per document"
+- "Upgrade to Pro — {proMonthlyPrice}/month"
+- "Usage this period"
+- "We could not charge your payment method. Your access continues until the end of the billing period, then the plan is paused. Update your payment method to avoid an interruption."
+- "We were unable to open the billing portal. Please try again, or contact support."
+- "We were unable to start the checkout. Please try again, or contact support."
+- "Welcome to your new plan"
+- "You have 1 document left this period."
+- "You have reached the {periodLimit} documents per month limit."
+- "You have sent all the documents included in the free Starter plan this month. Upgrade to Pro for unlimited sending — your recipients are never blocked."
+- "You have used {used} of {limit} free documents this month."
+- "You have used all {limit} free documents this month."
+- "Your plan has been updated. You can start sending without limits right away."
+- "Your subscription is being activated — this usually takes a few seconds."
+```
+
+Glossary compliance verified on the new msgstrs:
+- **email → courriel** (0 `email`/`e-mail` in new msgstrs; "courriels de
+  signature" for signing emails).
+- **template → modèle**, **recipient → destinataire**, **sender →
+  expéditeur**, formal « vous », fr-CA punctuation (NBSP before « : », « … »,
+  typographic apostrophes), prices as « 0 $ » / « dollars canadiens » per
+  fr-CA convention (unit before, space included).
+- Tier names Starter/Pro/Business are brand proper nouns and stay
+  untranslated (same rule as NorthSign; REVIEW-NOTES §4 exemption list).

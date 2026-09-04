@@ -14,6 +14,7 @@ import { AppBanner } from '~/components/general/app-banner';
 import { AppFooter } from '~/components/general/app-footer';
 import { Header } from '~/components/general/app-header';
 import { GenericErrorLayout } from '~/components/general/generic-error-layout';
+import { NorthSignBillingBanner } from '~/components/general/organisations/northsign-billing-banner';
 import { OrganisationBillingBanner } from '~/components/general/organisations/organisation-billing-banner';
 import { OrganisationQuotaBanner } from '~/components/general/organisations/organisation-quota-banner';
 import { VerifyEmailBanner } from '~/components/general/verify-email-banner';
@@ -113,6 +114,8 @@ export default function Layout({ loaderData, params, matches }: Route.ComponentP
     <OrganisationProvider organisation={currentOrganisation}>
       <TeamProvider team={currentTeam || null}>
         <div className={cn({ 'md:flex md:h-dvh md:flex-col md:overflow-hidden': layoutMode === 'settings' })}>
+          <NorthSignBillingBanner />
+
           <OrganisationBillingBanner />
 
           <OrganisationQuotaBanner />

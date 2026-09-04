@@ -18,9 +18,23 @@ export const FAIR_USE_LIMIT_EXCEEDED_ERROR_MESSAGE = {
   description: msg`Your organisation has reached its plan's fair use limit. Please contact your organisation administrator or support to continue.`,
 };
 
+// NorthSign plan-limit errors (Phase 6, D-035). Reached-limit copy points at
+// the free Starter allowance and tells the sender where to upgrade.
+export const DOCUMENT_SEND_LIMIT_REACHED_ERROR_MESSAGE = {
+  title: msg`Monthly sending limit reached`,
+  description: msg`You have sent all the documents included in the free Starter plan this month. Upgrade to Pro for unlimited sending — your recipients are never blocked.`,
+};
+
+export const PLAN_FEATURE_REQUIRED_ERROR_MESSAGE = {
+  title: msg`Upgrade required`,
+  description: msg`This feature is included with Pro and above. Upgrade from Settings → Billing to unlock it.`,
+};
+
 export const getDistributeErrorMessage = (code: string): ToastMessageDescriptor => {
   return match(code)
-    .with('RECIPIENT_LIMIT_EXCEEDED', () => RECIPIENT_LIMIT_EXCEEDED_ERROR_MESSAGE)
+    .with(AppErrorCode.DOCUMENT_SEND_LIMIT_REACHED, () => DOCUMENT_SEND_LIMIT_REACHED_ERROR_MESSAGE)
+    .with(AppErrorCode.PLAN_FEATURE_REQUIRED, () => PLAN_FEATURE_REQUIRED_ERROR_MESSAGE)
+    .with(AppErrorCode.RECIPIENT_LIMIT_EXCEEDED, () => RECIPIENT_LIMIT_EXCEEDED_ERROR_MESSAGE)
     .with(AppErrorCode.TOO_MANY_REQUESTS, () => FAIR_USE_LIMIT_EXCEEDED_ERROR_MESSAGE)
     .otherwise(() => ({
       title: msg`Something went wrong`,
@@ -30,7 +44,9 @@ export const getDistributeErrorMessage = (code: string): ToastMessageDescriptor 
 
 export const getDirectTemplateErrorMessage = (code: string): ToastMessageDescriptor => {
   return match(code)
-    .with('RECIPIENT_LIMIT_EXCEEDED', () => RECIPIENT_LIMIT_EXCEEDED_ERROR_MESSAGE)
+    .with(AppErrorCode.DOCUMENT_SEND_LIMIT_REACHED, () => DOCUMENT_SEND_LIMIT_REACHED_ERROR_MESSAGE)
+    .with(AppErrorCode.PLAN_FEATURE_REQUIRED, () => PLAN_FEATURE_REQUIRED_ERROR_MESSAGE)
+    .with(AppErrorCode.RECIPIENT_LIMIT_EXCEEDED, () => RECIPIENT_LIMIT_EXCEEDED_ERROR_MESSAGE)
     .with(AppErrorCode.TOO_MANY_REQUESTS, () => FAIR_USE_LIMIT_EXCEEDED_ERROR_MESSAGE)
     .with(AppErrorCode.MISSING_SIGNATURE_FIELD, () => ({
       title: msg`Missing signature fields`,

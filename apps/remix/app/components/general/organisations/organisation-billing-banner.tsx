@@ -203,6 +203,13 @@ const getBannerVariant = (organisation: ReturnType<typeof useOptionalCurrentOrga
     return null;
   }
 
+  // NorthSign-managed rows (provider MOCK/STRIPE, Phase 6 D-035) are handled
+  // by <NorthSignBillingBanner> — the EE portal route this banner calls would
+  // otherwise 500 on them.
+  if (organisation.subscription?.provider) {
+    return null;
+  }
+
   if (isOrganisationPendingPayment(organisation)) {
     return 'PENDING_PAYMENT';
   }

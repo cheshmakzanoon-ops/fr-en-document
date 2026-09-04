@@ -1,8 +1,8 @@
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react/macro';
 
+import { NorthSignBillingDashboard } from '~/components/general/northsign-billing-dashboard';
 import { SettingsHeader } from '~/components/general/settings-header';
-import { UserBillingOrganisationsTable } from '~/components/tables/user-billing-organisations-table';
 import { appMetaTags } from '~/utils/meta';
 
 export function meta() {
@@ -16,11 +16,11 @@ export default function SettingsBilling() {
     <div>
       <SettingsHeader
         title={t`Billing`}
-        subtitle={t`Manage billing and subscriptions for organisations where you have billing management permissions.`}
+        subtitle={t`Manage the plan, usage, payment method and invoices for the organisations you own. Prices are in CAD and exclude GST/HST/QST, which are calculated at checkout.`}
         hideDivider
       />
 
-      <UserBillingOrganisationsTable />
+      <NorthSignBillingDashboard />
     </div>
   );
 }
