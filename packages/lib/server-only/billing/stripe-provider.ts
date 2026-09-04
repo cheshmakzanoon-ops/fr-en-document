@@ -13,7 +13,7 @@ import type {
   CreatePortalSessionResult,
 } from './billing-service';
 import type { BillingInterval } from './plans';
-import { upsertSubscription } from './subscription-store';
+import { findSubscriptionByOrganisationId, updateSubscriptionFlags, upsertSubscription } from './subscription-store';
 
 /**
  * Stripe billing provider (Phase 6, D-033) — TEST MODE only.
@@ -179,7 +179,12 @@ const stripeStatusToSubscriptionStatus = (status: Stripe.Subscription.Status): S
   }
 };
 
-const stripeSubscriptionToUpsertOptions = ({
+/**
+ * Map a Stripe subscription object onto our local row shape. Returns null
+ * when the subscription uses a price NorthSign does not own (never upgrades
+ * a plan off an unknown price — the caller logs and leaves the row as-is).
+ */
+export const stripeSubscriptionToUpsertOptions = ({
   organisationId,
   customerId,
   subscription,
@@ -187,15 +192,13 @@ const stripeSubscriptionToUpsertOptions = ({
   organisationId: string;
   customerId: string;
   subscription: Stripe.Subscription;
-}) => {
+}): Parameters<typeof upsertSubscription>[0] | null => {
   const price = subscription.items.data[0]?.price;
 
   const plan = price ? mapStripePriceIdToPlan(price.id) : null;
 
   if (!plan) {
-    throw new AppError(AppErrorCode.NOT_SETUP, {
-      message: `Stripe subscription ${subscription.id} uses an unknown price (${price?.id ?? 'none'}). Configure the NEXT_PRIVATE_STRIPE_PRICE_* env vars.`,
-    });
+    return null;
   }
 
   return {
@@ -209,7 +212,7 @@ const stripeSubscriptionToUpsertOptions = ({
     periodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
     periodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
-  } satisfies Parameters<typeof upsertSubscription>[0];
+  };
 };
 
 /**
@@ -239,19 +242,36 @@ export const syncSubscriptionFromStripe = async (organisationId: string): Promis
     limit: 1,
   });
 
-  const current = subscriptions.data[0];
+  const liveStatuses = new Set<Stripe.Subscription.Status>(['active', 'trialing', 'past_due']);
+
+  const current = subscriptions.data.find((subscription) => liveStatuses.has(subscription.status));
 
   if (!current) {
-    // No live subscription: leave the local row as-is (free plan). Stripe's
-    // webhooks converge cancellations; the local row only records history.
+    // No live subscription: converge any existing STRIPE row to INACTIVE so
+    // the free-tier usage window honours the last paid period end. Rows from
+    // other providers are untouched.
+    const existing = await findSubscriptionByOrganisationId(organisationId);
+
+    if (existing?.provider === BillingProvider.STRIPE && existing.status !== SubscriptionStatus.INACTIVE) {
+      await updateSubscriptionFlags({
+        organisationId,
+        status: SubscriptionStatus.INACTIVE,
+        cancelAtPeriodEnd: false,
+      });
+    }
+
     return;
   }
 
-  const upsertData = await stripeSubscriptionToUpsertOptions({
+  const upsertData = stripeSubscriptionToUpsertOptions({
     organisationId,
     customerId: organisation.customerId,
     subscription: current,
   });
+
+  if (!upsertData) {
+    return;
+  }
 
   await upsertSubscription(upsertData);
 };

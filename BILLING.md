@@ -243,12 +243,27 @@ events are acknowledged with 200 and ignored.
 
 ### 4.3 Env vars (placeholders only — no committed values)
 
-See `.env.production.example` — entries are **empty by design**:
-`BILLING_PROVIDER`, `NEXT_PRIVATE_STRIPE_API_KEY`,
-`NEXT_PRIVATE_STRIPE_WEBHOOK_SECRET`, `NEXT_PRIVATE_STRIPE_PRICE_PRO_MONTHLY`,
-`NEXT_PRIVATE_STRIPE_PRICE_PRO_ANNUAL`,
-`NEXT_PRIVATE_STRIPE_PRICE_BUSINESS_MONTHLY`,
-`NEXT_PRIVATE_STRIPE_PRICE_BUSINESS_ANNUAL`.
+App code reads: `BILLING_PROVIDER` (unset → mock), `NEXT_PRIVATE_STRIPE_API_KEY`,
+`NEXT_PRIVATE_STRIPE_WEBHOOK_SECRET`, and the four price ids
+`NEXT_PRIVATE_STRIPE_PRICE_{PRO,BUSINESS}_{MONTHLY,ANNUAL}`.
+
+**Operator task (Phase 6 build sandbox cannot edit `.env*` files — the
+platform write-protects them):** paste this block (empty values) into
+`.env.example` **and** `.env.production.example` under the `[[STRIPE]]`
+section so the templates carry the Phase 6 placeholders:
+
+```dotenv
+# NorthSign billing (Phase 6): BILLING_PROVIDER=mock|stripe (default mock).
+# stripe uses TEST MODE keys only; never put live keys here.
+BILLING_PROVIDER=
+NEXT_PRIVATE_STRIPE_API_KEY=
+NEXT_PRIVATE_STRIPE_WEBHOOK_SECRET=
+# Test-mode price ids for the NorthSign plans (monthly/annual, CAD).
+NEXT_PRIVATE_STRIPE_PRICE_PRO_MONTHLY=
+NEXT_PRIVATE_STRIPE_PRICE_PRO_ANNUAL=
+NEXT_PRIVATE_STRIPE_PRICE_BUSINESS_MONTHLY=
+NEXT_PRIVATE_STRIPE_PRICE_BUSINESS_ANNUAL=
+```
 
 CI keeps `BILLING_PROVIDER` unset → mock. Real test-mode keys live only in
 local `.env.local` and in the repo's GitHub Secrets if the operator adds them
