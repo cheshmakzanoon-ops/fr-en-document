@@ -328,10 +328,19 @@ export const addSignatureField = async ({
 
 /**
  * Send the envelope through the real "Send Document" → distribute dialog and
- * wait for the redirect back to the documents list.
+ * wait for the redirect to the sent document's view page.
  */
 export const sendEnvelope = async ({ page, locale = 'en' }: { page: Page; locale?: TestLocale }): Promise<void> => {
   const L = LABELS[locale];
+
+  // Remember the editor's pathname so we can wait for the post-send navigation
+  // away from it. The editor lives at /t/{team}/documents/envelope_X/edit —
+  // note that BOTH the editor and the post-send document view match
+  // /documents/, so a bare waitForURL(/\/documents/) resolves immediately and
+  // a caller that navigates away right after can abort the in-flight
+  // distribute mutation before it reaches the server (the send silently never
+  // happens and no billing usage event is journaled).
+  const editorPathname = new URL(page.url()).pathname;
 
   await page.getByRole('button', { name: L.sendDocument, exact: true }).first().click();
 
@@ -342,7 +351,13 @@ export const sendEnvelope = async ({ page, locale = 'en' }: { page: Page; locale
   await expect(sendButton).toBeVisible({ timeout: 15_000 });
   await sendButton.click();
 
-  await page.waitForURL(/\/documents/, { timeout: 30_000 });
+  // Success is only confirmed once the distribute dialog navigates to the
+  // document view (/t/{team}/documents/envelope_X — no /edit suffix). The
+  // dialog navigates only AFTER its mutation resolves server-side, so waiting
+  // for the URL to LEAVE the editor makes the send — and its billing usage
+  // journal entry — deterministic before the helper returns. A send that
+  // never completes fails here loudly instead of poisoning later steps.
+  await page.waitForURL((url) => url.pathname !== editorPathname, { timeout: 30_000 });
 };
 
 /**
