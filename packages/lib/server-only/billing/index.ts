@@ -38,3 +38,11 @@ export {
   updateSubscriptionFlags,
   upsertSubscription,
 } from './subscription-store';
+export {
+  assertAndRecordEnvelopeSend,
+  assertOrganisationAllowsFeature,
+  assertRecipientLimitForOrganisation,
+  countDocumentsSentByOrganisationSince,
+  RECIPIENT_LIMIT_MAX_MESSAGE,
+  recordEnvelopeSendEvent,
+} from './usage';

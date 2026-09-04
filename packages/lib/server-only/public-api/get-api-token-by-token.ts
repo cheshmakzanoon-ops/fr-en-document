@@ -3,6 +3,7 @@ import { prisma } from '@documenso/prisma';
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import { logger } from '../../utils/logger';
 import { hashString } from '../auth/hash';
+import { assertOrganisationAllowsFeature } from '../billing/usage';
 import { assertOrganisationRatesAndLimits } from '../rate-limit/assert-organisation-rates-and-limits';
 
 const LAST_USED_AT_UPDATE_INTERVAL = 60_000; // 1 minute
@@ -74,6 +75,14 @@ export const getApiTokenByToken = async ({ token, bypassRateLimit = false }: Get
       statusCode: 401,
     });
   }
+
+  // Phase 6 (D-032): API access is a Pro+ sender feature. Enforced here — the
+  // choke point both API v1 and v2 authentication flow through — so tokens die
+  // the moment their organisation downgrades, not just at creation time.
+  await assertOrganisationAllowsFeature({
+    organisationId: apiToken.team.organisationId,
+    feature: 'api',
+  });
 
   if (!bypassRateLimit) {
     await assertOrganisationRatesAndLimits({

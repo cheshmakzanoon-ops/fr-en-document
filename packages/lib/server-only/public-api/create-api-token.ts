@@ -9,6 +9,7 @@ import { AppError, AppErrorCode } from '../../errors/app-error';
 import { alphaid } from '../../universal/id';
 import { buildTeamWhereQuery } from '../../utils/teams';
 import { hashString } from '../auth/hash';
+import { assertOrganisationAllowsFeature } from '../billing/usage';
 
 type TimeConstants = typeof timeConstants & {
   [key: string]: number | Duration;
@@ -41,6 +42,12 @@ export const createApiToken = async ({ userId, teamId, tokenName, expiresIn }: C
       message: 'You do not have permission to create a token for this team',
     });
   }
+
+  // Phase 6 (D-032): creating API tokens is a Pro+ sender action.
+  await assertOrganisationAllowsFeature({
+    organisationId: team.organisationId,
+    feature: 'api',
+  });
 
   const storedToken = await prisma.apiToken.create({
     data: {

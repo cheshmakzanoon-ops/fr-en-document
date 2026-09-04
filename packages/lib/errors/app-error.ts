@@ -11,6 +11,23 @@ export enum AppErrorCode {
   INVALID_REQUEST = 'INVALID_REQUEST',
   RECIPIENT_EXPIRED = 'RECIPIENT_EXPIRED',
   LIMIT_EXCEEDED = 'LIMIT_EXCEEDED',
+
+  /**
+   * The sender's plan allowance of documents per billing period is used up
+   * (Starter: 3 sends/month). HTTP 402 — the fix is upgrading, not retrying.
+   */
+  DOCUMENT_SEND_LIMIT_REACHED = 'DOCUMENT_SEND_LIMIT_REACHED',
+
+  /**
+   * The document has more recipients than the sender's plan allows
+   * (Starter: 2 recipients/document).
+   */
+  RECIPIENT_LIMIT_EXCEEDED = 'RECIPIENT_LIMIT_EXCEEDED',
+
+  /**
+   * A sender action needs a paid plan feature (templates or API access).
+   */
+  PLAN_FEATURE_REQUIRED = 'PLAN_FEATURE_REQUIRED',
   NOT_FOUND = 'NOT_FOUND',
   NOT_IMPLEMENTED = 'NOT_IMPLEMENTED',
   NOT_SETUP = 'NOT_SETUP',
@@ -91,6 +108,9 @@ export enum AppErrorCode {
 export const genericErrorCodeToTrpcErrorCodeMap: Record<string, { code: string; status: number }> = {
   [AppErrorCode.ALREADY_EXISTS]: { code: 'BAD_REQUEST', status: 400 },
   [AppErrorCode.RECIPIENT_EXPIRED]: { code: 'BAD_REQUEST', status: 400 },
+  [AppErrorCode.DOCUMENT_SEND_LIMIT_REACHED]: { code: 'PAYMENT_REQUIRED', status: 402 },
+  [AppErrorCode.RECIPIENT_LIMIT_EXCEEDED]: { code: 'BAD_REQUEST', status: 400 },
+  [AppErrorCode.PLAN_FEATURE_REQUIRED]: { code: 'FORBIDDEN', status: 403 },
   [AppErrorCode.EXPIRED_CODE]: { code: 'BAD_REQUEST', status: 400 },
   [AppErrorCode.INVALID_BODY]: { code: 'BAD_REQUEST', status: 400 },
   [AppErrorCode.INVALID_REQUEST]: { code: 'BAD_REQUEST', status: 400 },
@@ -307,7 +327,7 @@ export class AppError extends Error {
   }
 
   static toRestAPIError(err: unknown): {
-    status: 400 | 401 | 403 | 404 | 500 | 501;
+    status: 400 | 401 | 402 | 403 | 404 | 500 | 501;
     body: { message: string };
   } {
     const error = AppError.parseError(err);
@@ -325,6 +345,7 @@ export class AppError extends Error {
         AppErrorCode.MISSING_SIGNATURE_FIELD,
         AppErrorCode.RECIPIENT_HAS_UNSIGNED_FIELDS,
         AppErrorCode.RECIPIENT_OUT_OF_TURN,
+        AppErrorCode.RECIPIENT_LIMIT_EXCEEDED,
         AppErrorCode.CSC_INSTANCE_MODE_MISMATCH,
         AppErrorCode.CSC_CREDENTIAL_LIST_EMPTY,
         AppErrorCode.CSC_CERT_INVALID,
@@ -334,7 +355,8 @@ export class AppError extends Error {
         () => 400 as const,
       )
       .with(AppErrorCode.UNAUTHORIZED, () => 401 as const)
-      .with(AppErrorCode.FORBIDDEN, AppErrorCode.CSC_UNLICENSED, () => 403 as const)
+      .with(AppErrorCode.DOCUMENT_SEND_LIMIT_REACHED, () => 402 as const)
+      .with(AppErrorCode.FORBIDDEN, AppErrorCode.CSC_UNLICENSED, AppErrorCode.PLAN_FEATURE_REQUIRED, () => 403 as const)
       .with(AppErrorCode.NOT_FOUND, () => 404 as const)
       .with(AppErrorCode.NOT_IMPLEMENTED, () => 501 as const)
       .otherwise(() => 500 as const);

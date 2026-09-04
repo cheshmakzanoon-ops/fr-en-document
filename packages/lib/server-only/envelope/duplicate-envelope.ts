@@ -8,6 +8,7 @@ import { ZSignatureLevelSchema } from '../../types/signature-level';
 import { mapEnvelopeToWebhookDocumentPayload, ZWebhookDocumentSchema } from '../../types/webhook-payload';
 import { nanoid, prefixedId } from '../../universal/id';
 import type { EnvelopeIdOptions } from '../../utils/envelope';
+import { assertOrganisationAllowsFeature } from '../billing/usage';
 import { getEnvelopeWhereInput } from '../envelope/get-envelope-by-id';
 import { incrementDocumentId, incrementTemplateId } from '../envelope/increment-id';
 import { assertOrganisationRatesAndLimits } from '../rate-limit/assert-organisation-rates-and-limits';
@@ -93,6 +94,14 @@ export const duplicateEnvelope = async ({ id, userId, teamId, overrides }: Dupli
       organisationId: team.organisationId,
       type: 'document',
       count: 1,
+    });
+  }
+
+  // Phase 6 (D-032): saving/duplicating as a template is a Pro+ sender action.
+  if (targetType === EnvelopeType.TEMPLATE) {
+    await assertOrganisationAllowsFeature({
+      organisationId: team.organisationId,
+      feature: 'templates',
     });
   }
 

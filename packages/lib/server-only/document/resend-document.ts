@@ -1,7 +1,6 @@
 import { DocumentInviteEmailTemplate } from '@documenso/email/templates/document-invite';
 import { resolveExpiresAt } from '@documenso/lib/constants/envelope-expiration';
 import { RECIPIENT_ROLE_TO_EMAIL_TYPE, RECIPIENT_ROLES_DESCRIPTION } from '@documenso/lib/constants/recipient-roles';
-import { AppError } from '@documenso/lib/errors/app-error';
 import { DOCUMENT_AUDIT_LOG_TYPE } from '@documenso/lib/types/document-audit-logs';
 import type { ApiRequestMetadata } from '@documenso/lib/universal/extract-request-metadata';
 import { createDocumentAuditLogData } from '@documenso/lib/utils/document-audit-logs';
@@ -27,6 +26,7 @@ import { isDocumentCompleted } from '../../utils/document';
 import type { EnvelopeIdOptions } from '../../utils/envelope';
 import { isRecipientEmailValidForSending } from '../../utils/recipients';
 import { renderEmailWithI18N } from '../../utils/render-email-with-i18n';
+import { assertRecipientLimitForOrganisation } from '../billing/usage';
 import { buildEnvelopeEmailHeaders } from '../email/build-envelope-email-headers';
 import { getEmailContext } from '../email/get-email-context';
 import { getEnvelopeWhereInput } from '../envelope/get-envelope-by-id';
@@ -76,15 +76,7 @@ export const resendDocument = async ({ id, userId, recipients, teamId, requestMe
         select: {
           teamEmail: true,
           name: true,
-          organisation: {
-            select: {
-              organisationClaim: {
-                select: {
-                  recipientCount: true,
-                },
-              },
-            },
-          },
+          organisationId: true,
         },
       },
     },
@@ -106,18 +98,20 @@ export const resendDocument = async ({ id, userId, recipients, teamId, requestMe
     throw new Error('Can not send completed document');
   }
 
-  // A recipientCount of 0 means unlimited recipients are allowed. Block resending
-  // when the document has more recipients than the organisation is allowed to send
-  // to, mirroring the check in `sendDocument`. This prevents bypassing the limit by
-  // adding recipients to an already-sent document and then resending.
-  const maximumRecipientCount = envelope.team.organisation.organisationClaim.recipientCount;
+  // NorthSign plan gate (Phase 6, D-032): the recipient cap is derived from
+  // the sender's plan, not the upstream EE claim. Block resending when the
+  // document now exceeds the allowance, mirroring `sendDocument` so the cap
+  // cannot be bypassed by adding recipients and resending.
+  const senderOrganisationId = envelope.team?.organisationId;
 
-  if (maximumRecipientCount > 0 && envelope.recipients.length > maximumRecipientCount) {
-    throw new AppError('RECIPIENT_LIMIT_EXCEEDED', {
-      message: `You cannot send a document with more than ${maximumRecipientCount} recipients`,
-      statusCode: 400,
-    });
+  if (!senderOrganisationId) {
+    throw new Error('Document team has no organisation');
   }
+
+  await assertRecipientLimitForOrganisation({
+    organisationId: senderOrganisationId,
+    recipientCount: envelope.recipients.length,
+  });
 
   const expiresAt = resolveExpiresAt(envelope.documentMeta?.envelopeExpirationPeriod ?? null);
 

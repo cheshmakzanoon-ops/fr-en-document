@@ -48,6 +48,7 @@ import {
 import type { EnvelopeIdOptions } from '../../utils/envelope';
 import { mapSecondaryIdToTemplateId } from '../../utils/envelope';
 import { buildTeamWhereQuery } from '../../utils/teams';
+import { assertOrganisationAllowsFeature } from '../billing/usage';
 import { getEnvelopeWhereInput } from '../envelope/get-envelope-by-id';
 import { incrementDocumentId } from '../envelope/increment-id';
 import { insertFormValuesInPdf } from '../pdf/insert-form-values-in-pdf';
@@ -347,6 +348,13 @@ export const createDocumentFromTemplate = async ({
       message: 'Template not found',
     });
   }
+
+  // Phase 6 (D-032): using a template (creating a document from it) is a Pro+
+  // sender action — gated on the caller's organisation.
+  await assertOrganisationAllowsFeature({
+    organisationId: callerTeam.organisationId,
+    feature: 'templates',
+  });
 
   if (folderId) {
     const folder = await prisma.folder.findUnique({

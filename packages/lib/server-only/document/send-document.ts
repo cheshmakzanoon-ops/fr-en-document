@@ -39,6 +39,7 @@ import { extractDocumentAuthMethods } from '../../utils/document-auth';
 import { type EnvelopeIdOptions, mapSecondaryIdToDocumentId } from '../../utils/envelope';
 import { toCheckboxCustomText, toRadioCustomText } from '../../utils/fields';
 import { getRecipientsWithMissingFields, isRecipientEmailValidForSending } from '../../utils/recipients';
+import { assertAndRecordEnvelopeSend, assertRecipientLimitForOrganisation } from '../billing/usage';
 import { getEnvelopeWhereInput } from '../envelope/get-envelope-by-id';
 import { insertFormValuesInPdf } from '../pdf/insert-form-values-in-pdf';
 import { assertUserNotDisabledById } from '../user/assert-user-not-disabled';
@@ -88,15 +89,7 @@ export const sendDocument = async ({ id, userId, teamId, sendEmail, requestMetad
       },
       team: {
         select: {
-          organisation: {
-            select: {
-              organisationClaim: {
-                select: {
-                  recipientCount: true,
-                },
-              },
-            },
-          },
+          organisationId: true,
         },
       },
     },
@@ -110,15 +103,20 @@ export const sendDocument = async ({ id, userId, teamId, sendEmail, requestMetad
     throw new Error('Document has no recipients');
   }
 
-  // A recipientCount of 0 means unlimited recipients are allowed.
-  const maximumRecipientCount = envelope.team.organisation.organisationClaim.recipientCount;
+  const organisationId = envelope.team?.organisationId;
 
-  if (maximumRecipientCount > 0 && envelope.recipients.length > maximumRecipientCount) {
-    throw new AppError('RECIPIENT_LIMIT_EXCEEDED', {
-      message: `You cannot send a document with more than ${maximumRecipientCount} recipients`,
-      statusCode: 400,
-    });
+  if (!organisationId) {
+    throw new Error('Document team has no organisation');
   }
+
+  // NorthSign plan gate (Phase 6, D-032): the recipient cap is derived from
+  // the sender's plan, not the upstream EE claim. The authoritative check
+  // (with the org row lock + send accounting) runs inside the transaction
+  // below; this is a cheap fail-fast for the common case.
+  await assertRecipientLimitForOrganisation({
+    organisationId,
+    recipientCount: envelope.recipients.length,
+  });
 
   if (isDocumentCompleted(envelope.status)) {
     throw new Error('Can not send completed document');
@@ -261,6 +259,15 @@ export const sendDocument = async ({ id, userId, teamId, sendEmail, requestMetad
           metadata: requestMetadata,
           data: {},
         }),
+      });
+
+      // Exactly-once send accounting + authoritative plan gate (Phase 6).
+      // Runs in the same transaction as the DRAFT → PENDING flip so a failed
+      // send never counts and a counted send can never be re-counted.
+      await assertAndRecordEnvelopeSend(tx, {
+        organisationId,
+        envelopeId: envelope.id,
+        recipientCount: envelope.recipients.length,
       });
     }
 

@@ -36,6 +36,7 @@ import { putPdfFileServerSide } from '../../universal/upload/put-file.server';
 import { extractDerivedDocumentMeta } from '../../utils/document';
 import { createDocumentAuthOptions, createRecipientAuthOptions } from '../../utils/document-auth';
 import { buildTeamWhereQuery } from '../../utils/teams';
+import { assertOrganisationAllowsFeature } from '../billing/usage';
 import { incrementDocumentId, incrementTemplateId } from '../envelope/increment-id';
 import { assertOrganisationRatesAndLimits } from '../rate-limit/assert-organisation-rates-and-limits';
 import { assertCompatibleRecipientRole } from '../signature-level/assert-compatible-recipient-role';
@@ -174,6 +175,14 @@ export const createEnvelope = async ({
       organisationClaim: team.organisation.organisationClaim,
       type: 'document',
       count: 1,
+    });
+  }
+
+  // Phase 6 (D-032): creating a template envelope is a Pro+ sender action.
+  if (type === EnvelopeType.TEMPLATE) {
+    await assertOrganisationAllowsFeature({
+      organisationId: team.organisationId,
+      feature: 'templates',
     });
   }
 
