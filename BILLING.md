@@ -309,6 +309,39 @@ period-end behavior ends it.
 - CI runs `BILLING_PROVIDER=mock` and needs **zero** Stripe secrets.
   Real test-mode Stripe E2E is a stretch goal only (see §8).
 
+### 6.1 Optional: real test-mode Stripe secrets for CI (NOT required)
+
+CI stays on the mock provider; these secrets only enable a future real
+Stripe test-mode E2E run. Attempted automatically in Phase 6 Step 6: the
+Freebuff-managed GitHub App credential (`freebuff-web[bot]`) is
+installation-scoped **without** the `actions: write` / secrets-admin
+permission — the API returned
+`403 Resource not accessible by integration` for both listing and creating
+`repos/…/actions/secrets`. Add them manually via the exact click-path:
+
+1. GitHub → repository **cheshmakzanoon-ops/fr-en-document** →
+   **Settings** → (left sidebar) **Secrets and variables** → **Actions**.
+2. **New repository secret** → Name:
+   `STRIPE_TEST_SECRET_KEY` — Value: your `sk_test_…` key from
+   [dashboard.stripe.com/test/apikeys](https://dashboard.stripe.com/test/apikeys).
+3. **New repository secret** → Name:
+   `STRIPE_TEST_WEBHOOK_SECRET` — Value: the `whsec_…` signing secret of
+   your **test-mode** webhook endpoint
+   (Developers → Webhooks → the endpoint → *Signing secret* → reveal/copy).
+4. (Optional, for the stretch-goal E2E) also add
+   `STRIPE_TEST_PRICE_PRO_MONTHLY`, `STRIPE_TEST_PRICE_PRO_ANNUAL`,
+   `STRIPE_TEST_PRICE_BUSINESS_MONTHLY`, `STRIPE_TEST_PRICE_BUSINESS_ANNUAL`
+   — the four `price_…` ids created in §4.1's local dev loop.
+5. Wire them into a job only when the stretch-goal test-mode E2E is built:
+   map them to `NEXT_PRIVATE_STRIPE_API_KEY`,
+   `NEXT_PRIVATE_STRIPE_WEBHOOK_SECRET`, and
+   `NEXT_PRIVATE_STRIPE_PRICE_*` in the job's `env:` and set
+   `BILLING_PROVIDER: stripe` for that job only. The default CI job keeps
+   running mock and never reads them.
+
+No secret values are committed anywhere in this repository (env-example
+placeholders only, §4.3).
+
 ---
 
 ## 7. What we are deliberately NOT building in v1
