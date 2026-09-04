@@ -16,7 +16,7 @@
 | 5 | PIPEDA / Law 25 compliance workstream | **complete** (DRAFT-review gates pending) |
 | 5.5 | CI + automated E2E verification | **complete** (pipeline shipped; first run expected red) |
 | 5.6 | Push, watch CI, fix — first green run | **complete** (all gates green, see Phase 5.6) |
-| 6 | Billing & plans (SMB pricing tiers) | pending |
+| 6 | Billing & plans (SMB pricing tiers) | **in progress** (BILLING.md, D-031..D-034) |
 | 7 | Admin, audit trail & reporting | pending |
 | 8 | Onboarding, templates & integrations | pending |
 | 9 | Hardening, load & security testing | pending |

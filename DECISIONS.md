@@ -480,3 +480,81 @@
   cause); the Phases 2/4/5 runtime-verification debt is retired except the
   pre-launch manual items (REVIEW-NOTES.md §4.5 visual text-expansion
   review, production smoke test, CI.md §6 branch protection).
+
+---
+
+## 2026-09-04 — Phase 6: Billing & monetization (NorthSign)
+
+### D-031: EE billing surface is COMMERCIAL — NorthSign builds its own billing from scratch (D-009 resolved)
+- **Decision:** Phase 6 (and any later billing work) is implemented **from
+  scratch in AGPL code** (`packages/prisma`, `packages/lib`,
+  `packages/trpc`, `apps/remix`). Nothing under `packages/ee` — the Stripe
+  Billing Module (`server-only/stripe/*`, incl. the webhook handler),
+  `limits/*`, and the internal claim/plan code — is imported, copied,
+  extended, or invoked by any NorthSign billing path. D-009 is now resolved.
+- **Why:** `packages/ee/LICENSE` is a COMMERCIAL license: production use
+  requires a paid Documenso Enterprise subscription (per-license fees for
+  the correct number of hosts). NorthSign is a commercial SaaS; shipping EE
+  billing code would both license-breach and make revenue depend on a
+  third party's per-seat pricing. The AGPL fork already *ships* the EE
+  source (upstream tree), and AGPL app code routes like
+  `api+/stripe.webhook.ts` still proxy to EE — Phase 6 **replaces** the
+  billing touchpoints with our own implementation (audit: BILLING.md §1;
+  EE files are read for audit only).
+- **Consequence:** the EE billing UIs/routes remain physically in the tree
+  (upstream AGPL app code calling EE) but are inert: NorthSign never sets
+  `NEXT_PUBLIC_FEATURE_BILLING_ENABLED` (the EE module's own flag) and no
+  NorthSign UI calls `enterprise.billing.*`. Removing the EE import surface
+  entirely is a later-phase cleanup that must not touch AGPL-derived
+  signing/org code paths this phase touches. AGPL-schema reuse is allowed
+  and used (below).
+
+### D-032: Schema — extend the AGPL Subscription table; new BillingUsageEvent journal; entitlements derived, no EE claims
+- **Decision:** extend the existing AGPL `Subscription` model with nullable
+  `provider` (BillingProvider MOCK/STRIPE), `plan` (BillingPlanType
+  STARTER/PRO/BUSINESS), `periodStart`, and `paymentFailedAt` columns, and
+  add an AGPL `BillingUsageEvent` table (organisationId FK cascade,
+  envelopeId unique, sentAt) as the exactly-once "document sent" journal.
+  No row = Starter (free tier needs no row). Entitlements are derived from
+  the row at read time; usage is counted from the journal per usage window.
+- **Why:** schema tables live in the AGPL `packages/prisma` package and are
+  safe to adapt (D-031). The existing EE claim tables (`SubscriptionClaim` /
+  `OrganisationClaim` quotas) are the EE plan engine; deriving NorthSign
+  entitlements from claims would couple us to EE semantics and to rows the
+  seed/migrations create for upstream reasons. Nullable columns keep every
+  pre-existing row valid (free-tier-safe) and leave the EE code paths that
+  still compile against `Subscription` untouched.
+- **Consequence:** one reversible migration
+  (`20260904000000_northsign_billing`, up/down validated on a scratch
+  Postgres), prisma client regenerated. Migration cost: a few nullable
+  columns + one small table with an index.
+
+### D-033: Billing service seam — interface + Mock/Stripe providers, env-selected, CI runs mock
+- **Decision:** all billing entry points go through a `BillingService`
+  interface (`createCheckoutSession`, `createPortalSession`,
+  `handleWebhookEvent`, …) with two implementations:
+  `MockBillingService` (default; instant grants, deterministic, zero
+  network/keys — CI and local dev) and `StripeBillingService` (test mode).
+  Selection via `BILLING_PROVIDER=mock|stripe` (default mock). CI never sets
+  `stripe`, so the pipeline stays secret-free by construction (D-029).
+- **Why:** D-030 requires every phase to end green on CI with zero secrets;
+  the mock provider makes the whole billing feature testable in CI (limit
+  UX, plan grants, period math) without Stripe, while the stripe provider
+  is exercised only by unit tests with fixture payloads and by the operator
+  on a test-mode dev box.
+- **Consequence:** new code may only depend on the interface; the Stripe SDK
+  import stays inside the Stripe provider (tree-shaken out of mock-only
+  paths by never being invoked, and safe to import since the client is
+  constructed lazily with the env key).
+
+### D-034: No free trials in v1 — the free Starter tier is the trial
+- **Decision:** NorthSign v1 offers no trial periods (`trial_period_days` is
+  never set at checkout). The always-free Starter plan (3 sends/month) is
+  the trial: unlimited duration, no credit card required, upgrade any time.
+- **Why:** trials add dunning/expiry states and a second downgrade path for
+  zero v1 revenue benefit; a permanently-free tier with a hard usage cap is
+  simpler to enforce, explain, and audit, and doubles as the product's
+  marketing hook (bilingual signing is free on every plan, BILLING.md §2).
+- **Consequence:** entitlement states are exactly Starter/Pro/Business ×
+  ACTIVE/PAST_DUE/INACTIVE; Stripe's default period-end behavior ends
+  unpaid subscriptions (no custom dunning in v1). Recorded in BILLING.md.
