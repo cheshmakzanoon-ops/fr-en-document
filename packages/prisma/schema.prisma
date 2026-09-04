@@ -275,6 +275,22 @@ enum SubscriptionStatus {
   INACTIVE
 }
 
+/// Who manages a NorthSign subscription row (Phase 6, D-032). Null on
+/// pre-existing rows that were never managed by NorthSign billing.
+enum BillingProvider {
+  MOCK
+  STRIPE
+}
+
+/// NorthSign billing plan (Phase 6, D-032). A missing `Subscription` row —
+/// not a STARTER row — represents the free Starter plan, so free accounts
+/// need no row and no default values are required anywhere.
+enum BillingPlanType {
+  STARTER
+  PRO
+  BUSINESS
+}
+
 model Subscription {
   id                Int                @id @default(autoincrement())
   status            SubscriptionStatus @default(INACTIVE)
@@ -290,7 +306,36 @@ model Subscription {
   organisationId String       @unique
   organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
 
+  // NorthSign billing extensions (Phase 6) — all nullable so every
+  // pre-existing row stays valid and the free tier needs no row at all.
+  provider BillingProvider?
+  plan     BillingPlanType?
+
+  /// Start of the current billing period (Stripe `current_period_start`).
+  /// Null for free accounts and pre-existing rows.
+  periodStart DateTime?
+
+  /// Set by `invoice.payment_failed`, cleared by `invoice.paid` — drives the
+  /// PAST_DUE banner (BILLING.md §4.2). No custom dunning in v1.
+  paymentFailedAt DateTime?
+
   @@index([organisationId])
+}
+
+/// Exactly-once journal of documents first sent by an organisation within a
+/// billing period (Phase 6, D-032). One row per envelope (`envelopeId`
+/// unique) makes usage accounting idempotent under retries and concurrent
+/// sends; rows are never deleted so billing history survives document
+/// deletion. Usage for a period = count of rows with `sentAt >= periodStart`.
+model BillingUsageEvent {
+  id             Int           @id @default(autoincrement())
+  organisationId String
+  organisation   Organisation  @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  envelopeId     String        @unique
+  sentAt         DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+
+  @@index([organisationId, sentAt])
 }
 
 /// @zod.import(["import { ZClaimFlagsSchema, ZRateLimitArraySchema } from '@documenso/lib/types/subscription';"])
@@ -860,6 +905,8 @@ model Organisation {
 
   customerId   String?       @unique
   subscription Subscription?
+
+  billingUsageEvents BillingUsageEvent[]
 
   organisationClaimId String            @unique
   organisationClaim   OrganisationClaim @relation(fields: [organisationClaimId], references: [id])
