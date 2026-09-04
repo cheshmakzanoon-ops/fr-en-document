@@ -16,7 +16,7 @@
 | 5 | PIPEDA / Law 25 compliance workstream | **complete** (DRAFT-review gates pending) |
 | 5.5 | CI + automated E2E verification | **complete** (pipeline shipped; first run expected red) |
 | 5.6 | Push, watch CI, fix — first green run | **complete** (all gates green, see Phase 5.6) |
-| 6 | Billing & plans (SMB pricing tiers) | **complete — awaiting green CI** (BILLING.md, D-031..D-036) |
+| 6 | Billing & plans (SMB pricing tiers) | **complete** (BILLING.md, D-031..D-036; green run 33929179905) |
 | 7 | Admin, audit trail & reporting | pending |
 | 8 | Onboarding, templates & integrations | pending |
 | 9 | Hardening, load & security testing | pending |
@@ -468,7 +468,7 @@ CI. Still manual before launch: REVIEW-NOTES.md §4.5 visual text-expansion
 review, the production smoke test, and the CI.md §6 branch-protection task
 (GitHub settings, operator-only).
 
-## Phase 6 — Billing & monetization (complete — awaiting green CI)
+## Phase 6 — Billing & monetization (complete — green CI confirmed)
 
 All Stripe work is TEST MODE; CI runs the **mock** billing provider with
 zero secrets (D-029/D-033). Design of record: `BILLING.md`; decisions
@@ -483,7 +483,7 @@ D-031..D-036 in `DECISIONS.md` (D-009 EE question resolved: D-031).
 | 4 | f2ecbb2 | Entitlement enforcement, sender-only: send count (row-locked, exactly-once), recipients/document, templates, API (unit gates in `assertOrganisationRatesAndLimits`, token create, v1/v2 request auth) |
 | 5 | fcdf074 | tRPC billing router; public `/pricing` (EN+fr-CA, annual toggle, tax note); `/settings/billing` dashboard (plan, usage, portal, upgrade); limit + payment-failed banners; limit toasts; 96 fr-CA msgids (REVIEW-NOTES §6); D-035 |
 | 6 | 618a0c0 | Unit tests (43: entitlement math, period windows, exactly-once accounting, webhook fixtures with offline HMAC verification) + mock E2E (limit UX, mock-Pro, pricing EN/fr); CI-secrets 403 verified → operator click-path in BILLING.md §6.1 (D-036) |
-| 7 | (this commit) | Docs finalized; push + CI-green confirmation below |
+| 7 | 8302855, 5d9e476, 116cd47 | Docs finalized (handoff record, D-035/D-036); step-7 E2E fixes (mock upgrade flow + assertions, deterministic sendEnvelope); push + green run 33929179905 |
 
 Test coverage (Step 6): unit suites cover the pure entitlement math, the
 period-boundary rules (downgrade clamping, paid-period windows), the
@@ -497,3 +497,19 @@ both languages. NOT yet proven: a real Stripe test-mode round-trip from CI
 Go-live blockers are unchanged and recorded in BILLING.md §8 — nothing in
 Phase 6 blocks building, only launching (incorporation, GST/HST decision,
 Stripe verification, live keys + live webhook endpoint).
+
+### Phase 6 run history
+
+| Commit | Run | Result | Failure | Class | Fix |
+|---|---|---|---|---|---|
+| 618a0c0 | 33835403956 | GREEN | — | — | — |
+| 8302855 | 33849623166 | RED | E2E job only (lint/tsc passed): step-7 mock-upgrade E2E assertions too strict | e2e (test bug) | 5d9e476 |
+| 5d9e476 | 33857692243 | RED | E2E job only: sendEnvelope flaked on timing — CI replied before the distribute mutation landed | e2e (test flake) | 116cd47 |
+| 116cd47 | 33929179905 | **GREEN** | — | — | — |
+
+Final green run (33929179905, 7m56s): baseline lint/tsc gates clean (5
+biome errors / 842 warnings, D-028 allowlist) and all E2E gates passed,
+including the Phase 6 suites — free-tier limit UX, mock-Pro upgrade with
+plan persistence, pricing page EN/fr, and the 43 unit tests. **D-030 gate
+satisfied for Phase 6** — the phase is closed and Phase 7 (admin, audit
+trail & reporting) may start on a green base.
