@@ -55,9 +55,10 @@ test.describe('[NORTHSIGN][BILLING] mock provider', () => {
       await expect(page.getByRole('heading', { name: tier, exact: true })).toBeVisible();
     }
 
-    // CAD prices + tax-at-checkout note (en-CA formatting: "$19").
+    // CAD prices + tax-at-checkout note (en-CA formatting: "$19"). The page
+    // defaults to MONTHLY billing, so the annual price only appears on the
+    // Pro/Business cards' comparison table — assert it after the toggle.
     await expect(page.getByText('$19', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('$190', { exact: false }).first()).toBeVisible();
     await expect(page.getByText(/taxes are calculated at checkout/i)).toBeVisible();
 
     // Comparison table exists with the per-recipient-locale row (always free).
@@ -72,8 +73,9 @@ test.describe('[NORTHSIGN][BILLING] mock provider', () => {
 
     await expect(page.getByRole('heading', { name: /tarification simple et transparente/i })).toBeVisible();
 
-    // fr-CA currency formatting: "19 $".
-    await expect(page.getByText(/19 \$|190 \$/).first()).toBeVisible();
+    // fr-CA currency formatting: "19 $CA" — Intl uses a NO-BREAK space
+    // between number and symbol, so match any whitespace there.
+    await expect(page.getByText(/19\s\$|190\s\$/).first()).toBeVisible();
     await expect(page.getByText(/calculées au moment du paiement/i)).toBeVisible();
   });
 
@@ -142,8 +144,10 @@ test.describe('[NORTHSIGN][BILLING] mock provider', () => {
     // Upgrade before sending anything.
     await upgradeOrganisationViaMockCheckout(page, email);
 
-    // The billing page reflects the granted plan.
-    await expect(page.getByText(/unlimited documents/i)).toBeVisible({ timeout: 30_000 });
+    // The billing page reflects the granted plan (Pro plan badge + Active
+    // status on the organisation card).
+    await expect(page.getByText('Pro', { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
     let documentsUrl = '';
 
@@ -178,7 +182,11 @@ test.describe('[NORTHSIGN][BILLING] mock provider', () => {
 
     await upgradeOrganisationViaMockCheckout(page, email);
 
-    await expect(page.getByText(/unlimited documents/i)).toBeVisible({ timeout: 30_000 });
+    // Same dashboard surface as test 2: the Pro badge + Active status prove
+    // the grant landed ("Unlimited documents" only renders on paid plans
+    // with no set period, which the mock monthly grant does not produce).
+    await expect(page.getByText('Pro', { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
     // Sign back in on a fresh browser context to prove the subscription row
     // persists beyond any one session.
@@ -204,7 +212,8 @@ test.describe('[NORTHSIGN][BILLING] mock provider', () => {
 
     await newPage.goto('/settings/billing');
 
-    await expect(newPage.getByText(/unlimited documents/i).first()).toBeVisible({ timeout: 30_000 });
+    await expect(newPage.getByText('Pro', { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(newPage.getByText('Active', { exact: true })).toBeVisible();
 
     await newContext.close();
   });

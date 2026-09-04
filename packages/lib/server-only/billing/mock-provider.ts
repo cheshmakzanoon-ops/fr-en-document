@@ -21,9 +21,15 @@ import type { BillingInterval } from './plans';
  */
 const MOCK_CHECKOUT_PATH = '/api/billing/mock/checkout';
 
-export const mockCheckoutUrl = (plan: BillingPlanType, interval: BillingInterval, returnUrl: string): string => {
+export const mockCheckoutUrl = (
+  plan: BillingPlanType,
+  interval: BillingInterval,
+  returnUrl: string,
+  organisationId: string,
+): string => {
   const url = new URL(`${NEXT_PUBLIC_WEBAPP_URL()}${MOCK_CHECKOUT_PATH}`);
 
+  url.searchParams.set('org', organisationId);
   url.searchParams.set('plan', plan);
   url.searchParams.set('interval', interval);
   url.searchParams.set('return', returnUrl);
@@ -39,12 +45,13 @@ export const mockBillingService: BillingService = {
   provider: BillingProvider.MOCK,
 
   createCheckoutSession({
+    organisationId,
     plan,
     interval,
     returnUrl,
   }: CreateCheckoutSessionOptions): Promise<CreateCheckoutSessionResult> {
     return Promise.resolve({
-      url: mockCheckoutUrl(plan, interval, returnUrl),
+      url: mockCheckoutUrl(plan, interval, returnUrl, organisationId),
     });
   },
 
