@@ -14,7 +14,8 @@
 | 3 | Canadian hosting & data residency (AWS ca-central-1) | pending operator provisioning |
 | 4 | Bilingual i18n (EN/FR) with Lingui | **complete** |
 | 5 | PIPEDA / Law 25 compliance workstream | **complete** (DRAFT-review gates pending) |
-| 5.5 | CI + automated E2E verification | **complete** (first run expected red — real bugs; baseline gates verified locally) |
+| 5.5 | CI + automated E2E verification | **complete** (pipeline shipped; first run expected red) |
+| 5.6 | Push, watch CI, fix — first green run | **complete** (all gates green, see Phase 5.6) |
 | 6 | Billing & plans (SMB pricing tiers) | pending |
 | 7 | Admin, audit trail & reporting | pending |
 | 8 | Onboarding, templates & integrations | pending |
@@ -431,9 +432,38 @@ found before billing exists.
 - [x] CI.md + branch-protection operator task
 - [x] PHASES.md/DECISIONS.md updated; no upstream refactors beyond what
       CI/E2E required (only the workflow file was replaced)
-- [ ] **Operator: push `dev` to trigger the first CI run** (expected red);
-      triage each failure as a real bug
-- [ ] **Operator: complete the branch-protection task in CI.md §6** after the
-      first successful run registers the check names
+- [x] First CI run pushed + driven to green (Phase 5.6; run history below)
+- [ ] **Operator: complete the branch-protection task in CI.md §6** (status
+      checks now registered — the run is green)
 - [ ] **Remains manual (pre-launch):** visual text-expansion review
       (REVIEW-NOTES.md §4.5) and the production smoke test
+
+## Phase 5.6 — Push, watch CI, fix (complete)
+
+The five phases of untested work met GitHub Actions for the first time. Run
+history on `dev` (workflow `.github/workflows/ci.yml`, both jobs, lint gate
+first):
+
+| Commit | Run | Result | Failure | Class | Fix |
+|---|---|---|---|---|---|
+| f0c7901 | 33597774923 | RED | workflow YAML parse; server boot/static/cert | infra | 8a93374, 9f03402 (fix(ci)) |
+| 8a93374 | 33598855799 | RED | server start path from repo root | infra | 9f03402 (fix(ci)) |
+| 9f03402 | 33600186916 | RED | root-loader lang redirect, export types, signup/sign dialog flow | app + e2e | dd15282, d5180ec, a13b72e |
+| be7ab3f | 33809482853 | RED | signature never inserted (signing flow) | e2e | 6485ac7 (fix(e2e)) |
+| 6485ac7 | 33811064175 | RED | helper clicked a DOM field attribute that does not exist — this codebase draws signing fields on a Konva canvas | e2e (test bug) | 7e6a4ef (fix(e2e)) |
+| 7e6a4ef | 33831253921 | RED | FR dashboard canary looked for a menu item behind a closed menu; date cells forced 12 h clock | e2e (test bug) + app | b7c5298 (fix(e2e)), fccf3be (fix(app)) |
+| b7c5298 | 33832495777 | RED | FR invitation email was English: new documents defaulted `DocumentMeta.language` to the org default (`en`) regardless of sender UI language | app | 3803202 (fix(app)) |
+| 3803202 | 33834808359 | **GREEN** | — | — | — |
+
+**First green run** (33834808359): `Lint & Typecheck (baseline gates)`
+passed (5 biome errors / 842 warnings baseline, tsc allowlist clean) and all
+10 E2E gates passed first-try with no retries — recipient-locale email,
+consent rows, data export, deletion orphaning, EN signing flow, FR signing
+flow (menu canary + 24 h dates + French invite email), and the four glossary
+guards.
+
+Runtime-verification debt from Phases 2/4/5 is **retired**: the app now
+boots, renders, sends email, signs, completes, exports, and deletes under
+CI. Still manual before launch: REVIEW-NOTES.md §4.5 visual text-expansion
+review, the production smoke test, and the CI.md §6 branch-protection task
+(GitHub settings, operator-only).

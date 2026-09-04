@@ -460,3 +460,23 @@
   bug. The Phase 4/5 operator runtime-QA checklists in PHASES.md are now
   covered by CI except visual text-expansion review (REVIEW-NOTES.md §4.5)
   and the pre-launch production smoke test, which stay manual.
+
+### D-030: CI is the standing regression gate — every future phase ends green before handoff
+- **Decision:** from Phase 5.6 onward, the GitHub Actions pipeline
+  (`.github/workflows/ci.yml`: `Lint & Typecheck (baseline gates)` +
+  `E2E (Playwright, zero secrets)`) is the definition of done for every
+  phase. A phase is not complete until its branch ends with a green run on
+  the base branch (dev), the biome/tsc baselines (D-028) hold, and the e2e
+  gates relevant to the phase pass first-try or with a triaged, committed
+  fix per root cause.
+- **Why:** Phases 2–5 shipped never-runtime-verified features; the first CI
+  run exposed four real bugs (signing-field insertion model, 12 h date
+  forcing under fr-CA, English invite emails for fr-session documents, and
+  a stale root-loader redirect) plus two test defects. CI is the only place
+  the full boot → sign → complete → delete journey executes, so it must
+  gate every handoff rather than being a post-hoc exercise.
+- **Consequence:** future phases budget CI cycles up front; failures are
+  classified test/app/infra and fixed at the root (one commit per root
+  cause); the Phases 2/4/5 runtime-verification debt is retired except the
+  pre-launch manual items (REVIEW-NOTES.md §4.5 visual text-expansion
+  review, production smoke test, CI.md §6 branch protection).
